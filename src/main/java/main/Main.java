@@ -1,6 +1,6 @@
-package main.java;
+package main;
 
-import java.util.*;
+import logic.GameLogic;
 import lombok.Data;
 
 @Data
@@ -9,11 +9,11 @@ import lombok.Data;
 public class Main {
 
     public static void main(String[] args) {
-        GameLogic gameLogic = new GameLogic();
+        //GameLogic gameLogic = new GameLogic();
 
         //Create user:
-        User user1 = gameLogic.createUser();
-        System.out.println("your username is " + user1.getUsername() + " and your password is " + user1.getPassword());
+        //User user1 = gameLogic.createUser();
+        //System.out.println("your username is " + user1.getUsername() + " and your password is " + user1.getPassword());
 
         /**User action:
          * 1) Register and login to the server
@@ -21,11 +21,13 @@ public class Main {
          * 3) Define a desk of Monster/Spells
          * 4) Battle against each other
          * 5) Compare their stats in the score-board.
+         * 6) Exit game
          * */
 
-        user1.getAction();
-
-
+        /*boolean isUserPlaying = false;
+        do {
+            isUserPlaying = user.getAction();
+        } while(isUserPlaying);*/
 
 
     }

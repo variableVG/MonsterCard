@@ -1,0 +1,24 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+User -> Deck : defineDeck
+Deck -> Battle : isUsed
+Battle -> Server : requestOtherUserDeck
+
+alt successful case
+Server --> Battle : sendOtherUserDeck
+Battle --> Deck : sendResultBattle
+Deck --> User : sendResultBattle
+Battle --> Server : updateResultBattle
+
+else error
+Server --> Battle : error
+Battle --> Deck : error
+Deck --> User : error
+end
+
+
+
+@enduml

@@ -1,0 +1,69 @@
+@startuml
+
+class User {
+  String username
+  String password
+  int coins
+
+  registerUser()
+  loginUser()
+  getCard()
+  defineDeck()
+  battle()
+  checkScoreBoard()
+  buyPackage()
+  tradingDeal()
+
+}
+
+class Deck {
+
+}
+
+class Card {
+  String name
+  final String damage
+  enum elementType
+}
+
+class SpellCard extends Card {
+
+}
+
+class MonsterCard extends Card {
+  MonsterTyp monstertyp
+}
+
+class Battle {
+
+}
+
+
+enum ElementType {
+  FIRE
+  WATER
+  NORMAL
+}
+
+enum MonserType {
+  GLOBIN
+  DRAGON
+  WIZZARD
+  ORK
+  KNIGHT
+  KRAKEN
+  ELF
+}
+
+
+
+User "1" -- "*" Card
+User "1" -- "1" Deck
+Deck "1" -- "4" Card
+Battle <-- Deck : user1
+Battle <-- Deck : user2
+
+
+
+
+@enduml
