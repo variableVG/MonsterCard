@@ -26,14 +26,18 @@ public class User {
     private static final int SIZE_OF_DECK = 4;
     ArrayList<Card> deck;
 
-    private static final int SIZE_OF_PACKAGE = 5;
-    ArrayList<Card> cardPackage;
-
 
     //CONSTRUCTOR - with @Builder not necessary (by now).
 
     //METHODS
-    private void checkYourCards() {
+    public void addCardsToStack(ArrayList<Card> cardPackage) {
+        for(Card card : cardPackage) {
+            //TO DO: evtl make a check of the cards here, that they have correct names etc
+            stack.add(card);
+        }
+    }
+
+    public void checkYourCards() {
         System.out.println("Your current stack is: ");
         int counter = 1;
         for (Card card : stack) {
@@ -42,7 +46,7 @@ public class User {
         }
     }
 
-    private void currentStatus() {
+    public void currentStatus() {
 
         System.out.println("You have " + coins + " coins");
     }
@@ -75,7 +79,7 @@ public class User {
         }
         else if(answer == 2) {
             System.out.println("You want to acquire some cards");
-            this.acquirePackage();
+            //this.acquirePackage();
         }
         else if(answer == 3) {
             System.out.println("You want to define a desk of Monster/Spells");
@@ -98,61 +102,48 @@ public class User {
     }
 
 
-
-    public void acquirePackage() {
-        System.out.println("You are about to buy a Package");
-        if(coins < 5) {
-            System.out.println("You don't have enough coin");
-            return;
+    public boolean configureDeck(String[] cardsIds) {
+        if(cardsIds.length > 4 || cardsIds.length < 1) {
+            System.out.println("Incorrect amount of cards, please check number of given cards to the deck");
+            return false;
         }
 
-        /*Random rand = new Random();
-        int randCard = 0;
+        // Make sure that the deck is empty and the stack contains all the cards.
 
-        for(int i = 0; i < 5; i++) {
-            randCard = rand.nextInt(2);
-            if (randCard % 2 == 0) {
-                MonsterCard card = new MonsterCard();
-                stack.add(card);
-            } else {
-                SpellCard card = new SpellCard();
-                stack.add(card);
+        moveCardsFromDeckToStack();
+
+        //check if all the cards exist in the stack:
+        for(String cardID : cardsIds) {
+            if(getCardFromStack(cardID) == null) {
+                return false;
             }
-            coins--;
-        }*/
+        }
 
-        //User needs to connect to DB.
-
-        checkYourCards();
-
+        //remove Card with cardId from the stack and add it to the deck
+        for(String cardID : cardsIds) {
+            Card card = getCardFromStack(cardID);
+            deck.add(card);
+            stack.remove(card);
+        }
+        return true;
     }
 
-    public void chooseDeck() {
-        System.out.println("You are in chooseDeck");
-        checkYourCards();
+    public Card getCardFromStack(String cardId) {
+        for(Card card: stack) {
+            if (cardId.equals(card.getId())) {
+                return card;
+            }
+        }
+        return null;
+    }
 
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Please enter number of card:  ");
-        int answer;
-        int counter = 0;
-
-        do {
-            try {
-                answer = scanner.nextInt();
-            }
-            catch (Exception e) {
-                System.out.println("not an integer");
-                continue;
-            }
-            if(answer > stack.size() || answer <= 0) {
-                System.out.println("Number out of range of stack");
-            }
-            else {
-                //deck.add(stack.at(answer-1));
-                counter++;
-            }
-        } while (counter < SIZE_OF_DECK);
-
+    private void moveCardsFromDeckToStack() {
+        while(!deck.isEmpty()) {
+            Card card = deck.remove(0);
+            stack.add(card);
+        }
     }
 
 }
+
+

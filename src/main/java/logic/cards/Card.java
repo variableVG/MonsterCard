@@ -14,6 +14,7 @@ public class Card {
 
     protected ElemType type;
 
+    /*
     Card () {
         Random rand = new Random();
         int randElemTypeNum = rand.nextInt(3);
@@ -34,27 +35,29 @@ public class Card {
 
 
     }
+    */
 
     public Card(String id, String name, double damage) {
         //set Id
         this.id = id;
 
+        //set name
+        this.name = name;
+
         //check the element of the card:
         if(name.contains(ElemType.Fire.toString())) {
-            System.out.println("Type of card is Fire");
             this.type = ElemType.Fire;
         }
         else if(name.contains(ElemType.Water.toString())) {
-            System.out.println("Type of card is Water");
             this.type = ElemType.Water;
         }
         else if(name.contains(ElemType.Normal.toString())) {
-            System.out.println("Type of card is Normal");
             this.type = ElemType.Normal;
         }
 
         //set damage
         this.damage = damage;
+
     }
 
 
