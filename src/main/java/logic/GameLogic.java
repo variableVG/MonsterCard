@@ -16,7 +16,7 @@ public class GameLogic {
 
     public DummyUserDB dummyDB;
 
-    GameLogic() {
+    public GameLogic() {
         dummyDB = new DummyUserDB();
     }
 
