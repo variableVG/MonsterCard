@@ -1,7 +1,5 @@
 package logic.cards;
 
-import java.util.Random;
-
 
 public class MonsterCard extends Card{
 
@@ -57,8 +55,8 @@ public class MonsterCard extends Card{
         else if(name.contains(MonsterType.Kraken.toString())) {
             this.monsterType = MonsterType.Kraken;
         }
-        else if(name.contains(MonsterType.Wizzard.toString())) {
-            this.monsterType = MonsterType.Wizzard;
+        else if(name.contains(MonsterType.Wizard.toString())) {
+            this.monsterType = MonsterType.Wizard;
         }
         else if(name.contains(MonsterType.Ork.toString())) {
             this.monsterType = MonsterType.Ork;
