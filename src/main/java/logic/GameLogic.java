@@ -105,5 +105,9 @@ public class GameLogic {
         return 0;
     }
 
-
+    public Battle startBattle(User user1, User user2) {
+        //startBattle() initializes the battle constructor. The battle itself takes place inside the Battle class.
+        Battle battle = new Battle(user1, user2);
+        return battle;
+    }
 }

@@ -39,6 +39,7 @@ public class MonsterCard extends Card{
     */
     public MonsterCard(String id, String name, double damage) {
         super(id, name, damage);
+        this.setCardType("Monster");
         //check the monster of the card:
         if(name.contains(MonsterType.Elf.toString())) {
             this.monsterType = MonsterType.Elf;

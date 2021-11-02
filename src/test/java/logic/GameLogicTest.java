@@ -50,7 +50,7 @@ public class GameLogicTest {
 
     }
 
-    ArrayList<Card> dummyAddDB() {
+    static ArrayList<Card> dummyAddDB() {
         Card card1 = new MonsterCard("a", "WaterGoblin", 10.0);
         Card card2 = new MonsterCard("b", "Dragon", 50.0);
         Card card3 = new SpellCard("c", "WaterSpell", 20.0);
@@ -101,53 +101,6 @@ public class GameLogicTest {
 
     }
 
-    @Test
-    @DisplayName("Check the card-stack of a user")
-    void checkCardsTest() {
-        User user = gameLogic.createUser("kienboec", "daniel");
-        ArrayList<Card> cards = dummyAddDB();
-        gameLogic.addPackageToDB(cards);
-        cards = dummyAddDB();
 
-        gameLogic.acquirePackage(user);
-
-        for(Card card : user.stack) {
-            assertTrue(cards.contains(card), "Wrong card was added to the user stack");
-        }
-    }
-
-    @Test
-    @DisplayName("Show deck")
-    void showDeckTest() {
-        User user = gameLogic.createUser("kienboec", "daniel");
-        //User user2 = gameLogic.createUser("altenhof", "markus");
-
-        assertTrue(user.getDeck() == null, "newly created user has cards in her/his deck");
-
-    }
-
-    @Test
-    @DisplayName("Configure Deck")
-    void configureDeckTest() {
-        User user = gameLogic.createUser("kienboec", "daniel");
-        ArrayList<Card> cards = dummyAddDB();
-        gameLogic.addPackageToDB(cards);
-        gameLogic.acquirePackage(user);
-
-        String[] cardsIds = {"a", "b", "c", "e"};
-        //test worked:
-        assertTrue(user.configureDeck(cardsIds) == true, "There is a problem with the deck" );
-
-        //length of cardsIds is not correct (more than 4 cards are chosen, or no card is chosen):
-        String[] cardsIdsEmpty = { };
-        assertTrue(user.configureDeck(cardsIdsEmpty) == false, "deck allows empty card");
-        String[] cardsIdsLong = {"a", "b", "c", "d", "e"};
-        assertTrue(user.configureDeck(cardsIdsLong) == false, "deck allows empty card");
-
-        //Check that the cardIds entered are correct
-        String[] cardsIdsChanged = {"a", "b", "asc", "e"};
-        assertTrue(user.configureDeck(cardsIdsChanged) == false, "cardId is wrong, but card has been accepted" );
-
-    }
 
 }

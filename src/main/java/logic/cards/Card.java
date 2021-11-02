@@ -11,6 +11,7 @@ public class Card {
     protected String id;
     protected String name;
     protected double damage; // it is constant
+    protected String cardType;
 
     protected ElemType type;
 
