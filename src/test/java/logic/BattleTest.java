@@ -69,5 +69,24 @@ public class BattleTest {
         //now I verify that the gotten card is actually in the deck:
         assertTrue( user2.getDeck().contains(battle.getCardFromDeck(user2, randomIndex)), "The chosen card is not in the deck of the user" );
     }
+    @Test
+    @DisplayName("Test battleLogicTest")
+    void  battleLogicTest() {
+
+        Card card1 = new MonsterCard("a", "WaterGoblin", 10.0);
+        Card card2 = new MonsterCard("b", "FireTroll", 15.0);
+        Card card3 = new MonsterCard("c", "Dragon", 20.0);
+        Card card4 = new MonsterCard("d", "Ork", 45.0);
+        Card card5 = new MonsterCard("e", "Wizard", 25.0);
+        Card card6 = new MonsterCard("f", "FireElf", 25.0);
+        Card card7 = new MonsterCard("g", "Troll", 15.0);
+        Card card8 = new MonsterCard("h", "Knight", 25.0);
+        Card card9 = new MonsterCard("i", "Kraken", 25.0);
+        Card card10 = new MonsterCard("j", "Elf", 25.0);
+        Card card11 = new MonsterCard("k", "FireElf", 25.0);
+
+        battle.battleLogic(card7, card1); //MONSTER
+
+    }
 
 }

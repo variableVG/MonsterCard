@@ -52,17 +52,16 @@ public class RestServer implements Runnable {
                  * */
                 BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
                 String message;
-                boolean head = true;
                 // https://stleary.github.io/JSON-java/index.html
                 String headerMsg = "";
 
                 /**
                  * */
 
+                // GET REQUEST FROM CLIENT
                 do {
                     message = reader.readLine(); //get next line from socket (input).
                     //System.out.println("got: " + message);
-
                     if(!message.isEmpty()) {
                         headerMsg = headerMsg + message + "\n";
                     }
@@ -100,17 +99,12 @@ public class RestServer implements Runnable {
                         System.out.println("  putting " + key + " : " + value);
                     }*/
 
-
                 } while (!message.isEmpty()); //loop ends when the received message is empty
 
-                //System.out.println("Hedaer message is ");
-                //System.out.printf(headerMsg);
-
-                JSONObject jsonHeader = HTTP.toJSONObject(headerMsg);
+                JSONObject jsonHeader = HTTP.toJSONObject(headerMsg); //get JSON Object
+                //https://www.tutorialspoint.com/org_json/org_json_http.htm
                 JSONObject jsonContent = null;
                 String contentMsg = null;
-                //System.out.println("Json Header object is ");
-                //System.out.println(jsonHeader);
 
                 if (jsonHeader.has("Content-Length")) { // check if there is a content in the message
                     int len = jsonHeader.getInt("Content-Length"); // get length of message-content
@@ -125,15 +119,14 @@ public class RestServer implements Runnable {
                         String contentType = jsonHeader.getString("Content-Type");
                         if ("application/json".equals(contentType)) { //check if what we get is a json.
                             jsonContent = new JSONObject(contentMsg);
-                            //System.out.println("Content: " + jsonContent.toString());
                         }
                     }
                 }
 
-                //send request and get an answer.
+                //SEND REQUEST AND GET ANSWER FROM DB
                 RequestAnswer requestAnswer = handleRequest(jsonHeader, jsonContent);
 
-                //Write in the socket the answer
+                //ANSWER BACK TO THE CLIENT: Write in the socket the answer
                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
                 String answer = null;
 
@@ -203,7 +196,7 @@ public class RestServer implements Runnable {
 
         try {
             if(jsonHeader.getString("Method").equals("POST")) {
-                if(jsonHeader.getString("Request-URI").equals("/users")) { //create a User
+                if(jsonHeader.getString("Request-URI").equals("/users")) { //CREATE A USER
                     User user = gameLogic.createUser(jsonContent.getString("Username"), jsonContent.getString("Password"));
                     if(user == null) {
                         throw new Exception("user could not be created");

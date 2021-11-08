@@ -1,9 +1,12 @@
 package logic.cards;
 
+import lombok.Data;
+
 
 public class MonsterCard extends Card{
 
-    MonsterType monsterType;
+    private MonsterType monsterType;
+    boolean isPureMonster;
 
     /*
     public MonsterCard() {
@@ -62,7 +65,16 @@ public class MonsterCard extends Card{
         else if(name.contains(MonsterType.Ork.toString())) {
             this.monsterType = MonsterType.Ork;
         }
+        else if(name.contains(MonsterType.Troll.toString())) {
+            this.monsterType = MonsterType.Troll;
+        }
 
     }
 
+    public MonsterType getMonsterType() {
+        if(cardType.equals("Monster")) {
+            return this.monsterType;
+        }
+        return null;
+    }
 }

@@ -8,6 +8,7 @@ import java.util.Random;
 
 @Data
 public class Card {
+
     protected String id;
     protected String name;
     protected double damage; // it is constant
@@ -61,6 +62,15 @@ public class Card {
 
     }
 
+
+    public  <E extends Enum<E>> boolean isPureMonster(String monsterName, Class<E> monsterType) {
+        for(E m : monsterType.getEnumConstants()) {
+            if(m.name().equals(monsterName)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 
 
