@@ -3,7 +3,6 @@ package server;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 import logic.GameLogic;
@@ -167,7 +166,6 @@ public class RestServer implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
 
     }
 

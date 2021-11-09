@@ -36,89 +36,46 @@ public class Battle {
     public void battleLogic(Card card1, Card card2) {
         //This function just parses the logic of one particular round (also 2 particular cards)
         String message = "PlayerA: " + card1.getName() + " (" + card1.getDamage() + " Damage) vs PlayerB: "
-                        + card2.getName() + " (" + card2.getDamage() + " Damage) \n"
-                        + card1.getDamage() + " VS " + card2.getDamage() + " -> ";
+                + card2.getName() + " (" + card2.getDamage() + " Damage) \n"
+                + card1.getDamage() + " VS " + card2.getDamage() + " -> ";
 
         String finalDamage = "";
         String winnerMsg = "";
 
         //MONSTER VS. MONSTER
-        if(card1 instanceof MonsterCard && card2 instanceof MonsterCard) {
-            System.out.println("You are fightings monsters!");
-            //TROLL
-            if(((MonsterCard) card1).getMonsterType() == MonsterType.Troll) {
-                //TROLL VS GOBLIN
-                if(((MonsterCard) card2).getMonsterType() == MonsterType.Goblin) {
-                    card1.setDamage(card1.getDamage() + STANDARD_DAMAGE);
-                    card2.setDamage(card2.getDamage() - STANDARD_DAMAGE);
-                    winnerMsg = " Troll defeats Goblin.";
-                }
-
+        if (card1 instanceof MonsterCard && card2 instanceof MonsterCard) {
+            if (((MonsterCard) card1).getMonsterType() == MonsterType.Ork && ((MonsterCard) card2).getMonsterType() == MonsterType.Wizard) {
+                winnerMsg = " Wizzard can control Orks so they are not able to damage them.";
             }
-            //ORKS
-            else if(((MonsterCard) card1).getMonsterType() == MonsterType.Ork) {
-                //ORKS VS WIZZARD
-                if(((MonsterCard) card2).getMonsterType() == MonsterType.Wizard) {
-                    winnerMsg = " Wizzard can control Orks so they are not able to damage them.";
-                }
-            }
-            //GOBLIN
-            else if(((MonsterCard) card1).getMonsterType() == MonsterType.Goblin) {
-                //GOBLIN VS TROLL
-                if(((MonsterCard) card2).getMonsterType() == MonsterType.Troll){
-                    card1.setDamage(card1.getDamage() - STANDARD_DAMAGE);
-                    card2.setDamage(card2.getDamage() + STANDARD_DAMAGE);
-                    winnerMsg = " Troll defeats Goblin.";
-                }
-                else if(((MonsterCard) card2).getMonsterType() == MonsterType.Dragon) {
-                    card1.setDamage(card1.getDamage() - STANDARD_DAMAGE);
-                    card2.setDamage(card2.getDamage() + STANDARD_DAMAGE);
-                    winnerMsg = " Goblins are too afraid of Dragons to attack. Dragons win.";
+            else if (((MonsterCard) card1).getMonsterType() == MonsterType.Wizard && ((MonsterCard) card2).getMonsterType() == MonsterType.Ork) {
+                winnerMsg = " Wizzard can control Orks so they are not able to damage them.";
+            } else if (((MonsterCard) card1).getMonsterType() == MonsterType.Goblin && ((MonsterCard) card2).getMonsterType() == MonsterType.Dragon) {
+                winnerMsg = " Goblins are too afraid of Dragons to attack. Dragons win.";
+            } else if (((MonsterCard) card1).getMonsterType() == MonsterType.Dragon && ((MonsterCard) card2).getMonsterType() == MonsterType.Goblin) {
+                winnerMsg = " Goblins are too afraid of Dragons to attack. Dragons win.";
+            } else if (((MonsterCard) card1).getMonsterType() == MonsterType.Dragon && ((MonsterCard) card2).getMonsterType() == MonsterType.Elf && card2.getType() == ElemType.Fire) {
+                winnerMsg = " The FireElves know Dragons since they were little and can evade their attacks.";
+            } else if (((MonsterCard) card1).getMonsterType() == MonsterType.Elf && card1.getType() == ElemType.Fire && ((MonsterCard) card2).getMonsterType() == MonsterType.Dragon) {
+                winnerMsg = " The FireElves know Dragons since they were little and can evade their attacks.";
+            } else {
+                if (card1.getDamage() > card2.getDamage()) {
+                    winnerMsg = " " + card1.getName() + " defeats " + card2.getName();
+                } else {
+                    winnerMsg = " " + card2.getName() + " defeats " + card1.getName();
                 }
             }
-            //DRAGONS
-            else if(((MonsterCard) card1).getMonsterType() == MonsterType.Dragon) {
-                //DRAGON VS GOBLIN
-                if(((MonsterCard) card2).getMonsterType() == MonsterType.Goblin) {
-                    card1.setDamage(card1.getDamage() + STANDARD_DAMAGE);
-                    card2.setDamage(card2.getDamage() - STANDARD_DAMAGE);
-                    winnerMsg = " Goblins are too afraid of Dragons to attack. Dragons win.";
-                }
-                //DRAGON VS ELF
-                else if(((MonsterCard) card2).getMonsterType() == MonsterType.Elf) {
-                    if(card2.getType() == ElemType.Fire) {
-                        winnerMsg = " The FireElves know Dragons since they were little and can evade their attacks.";
-                    }
-                }
-
-            }
-            //WIZZARD
-            else if(((MonsterCard) card1).getMonsterType() == MonsterType.Wizard) {
-                //WIZZARD VS ORKS
-                if(((MonsterCard) card2).getMonsterType() == MonsterType.Ork) {
-                    winnerMsg = " Wizzard can control Orks so they are not able to damage them.";
-                }
-            }
-            //ELF
-            else if(((MonsterCard) card1).getMonsterType() == MonsterType.Elf) {
-                //ELF VS DRAGON
-                if(((MonsterCard) card2).getMonsterType() == MonsterType.Dragon) {
-                    if(card1.getType() == ElemType.Fire) {
-                        winnerMsg = " The FireElves know Dragons since they were little and can evade their attacks.";
-                    }
-
-                }
-            }
-
         }
-        //SPELL VS. SPELL
+
         else if(card1 instanceof SpellCard && card2 instanceof SpellCard) {
             System.out.println("You are fightings spells!");
+
         }
         //MIXED FIGHT
         else {
             System.out.println("You are mixed!");
         }
+
+
         finalDamage = card1.getDamage() + " VS " + card2.getDamage() + " => ";
         System.out.println(message + finalDamage + winnerMsg );
 
