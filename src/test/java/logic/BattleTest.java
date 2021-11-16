@@ -80,14 +80,17 @@ public class BattleTest {
         Card card5 = new MonsterCard("e", "Wizard", 25.0);
         Card card6 = new MonsterCard("f", "FireElf", 25.0);
         Card card7 = new MonsterCard("g", "Troll", 15.0);
-        Card card8 = new MonsterCard("h", "Knight", 25.0);
+        Card card8 = new MonsterCard("h", "Knight", 15.0);
         Card card9 = new MonsterCard("i", "Kraken", 25.0);
         Card card10 = new MonsterCard("j", "Elf", 25.0);
         Card card11 = new MonsterCard("k", "FireElf", 25.0);
-        Card card12 = new SpellCard("l", "FireSpell", 90);
-        Card card13 = new SpellCard("m", "Waterspell", 05);
+        Card card12 = new SpellCard("l", "FireSpell", 10);
+        Card card13 = new SpellCard("m", "WaterSpell", 10);
+        Card card14 = new MonsterCard("h", "FightKnight", 25.0);
+        Card card15 = new MonsterCard("n", "FireKraken", 25.0);
+        Card card16 = new SpellCard("o", "RegularSpell", 10);
 
-        battle.battleLogic(card12, card13); //MONSTER
+        battle.battleLogic(card13, card9); //MONSTER
 
     }
 

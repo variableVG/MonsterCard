@@ -53,7 +53,7 @@ public class Card {
         else if(name.contains(ElemType.Water.toString())) {
             this.type = ElemType.Water;
         }
-        else if(name.contains(ElemType.Normal.toString())) {
+        else if(name.contains(ElemType.Normal.toString()) || name.contains("Regular")) {
             this.type = ElemType.Normal;
         }
 
