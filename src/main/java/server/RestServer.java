@@ -53,7 +53,6 @@ public class RestServer implements Runnable {
                 String message;
                 // https://stleary.github.io/JSON-java/index.html
                 String headerMsg = "";
-
                 /**
                  * */
 

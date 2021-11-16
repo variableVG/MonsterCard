@@ -84,8 +84,10 @@ public class BattleTest {
         Card card9 = new MonsterCard("i", "Kraken", 25.0);
         Card card10 = new MonsterCard("j", "Elf", 25.0);
         Card card11 = new MonsterCard("k", "FireElf", 25.0);
+        Card card12 = new SpellCard("l", "FireSpell", 90);
+        Card card13 = new SpellCard("m", "Waterspell", 05);
 
-        battle.battleLogic(card4, card11); //MONSTER
+        battle.battleLogic(card12, card13); //MONSTER
 
     }
 

@@ -65,14 +65,60 @@ public class Battle {
                 }
             }
         }
-
+        //SPELL VS.SPELL
         else if(card1 instanceof SpellCard && card2 instanceof SpellCard) {
             System.out.println("You are fightings spells!");
+            if(card1.getType() == ElemType.Water) {
+                if(card2.getType() == ElemType.Fire) { //card1 wins
+                    card1.setDamage(card1.getDamage() * 2);
+                    card2.setDamage(card2.getDamage() / 2);
+                    winnerMsg = " WaterSpell wins";
+                }
+                else if(card2.getType() == ElemType.Normal) { //card2 wins
+                    card1.setDamage(card1.getDamage() / 2);
+                    card2.setDamage(card2.getDamage() * 2);
+                    winnerMsg = " NormalSpell wins";
+                }
+                else {
+                    winnerMsg = "Draw";
+                }
+            }
+            else if(card1.getType() == ElemType.Fire) {
+                if(card2.getType() == ElemType.Water) { // card2 wins
+                    card1.setDamage(card1.getDamage() / 2);
+                    card2.setDamage(card2.getDamage() * 2);
+                }
+                else if(card2.getType() == ElemType.Normal) { //card1 wins
+                    card1.setDamage(card1.getDamage() * 2);
+                    card2.setDamage(card2.getDamage() / 2);
+                }
 
+            }
+            else if(card1.getType() == ElemType.Normal) {
+                if(card2.getType() == ElemType.Water) { // card1 wins
+                    card1.setDamage(card1.getDamage() * 2);
+                    card2.setDamage(card2.getDamage() / 2);
+                }
+                else if(card2.getType() == ElemType.Fire) { //card2 wins
+                    card1.setDamage(card1.getDamage() / 2);
+                    card2.setDamage(card2.getDamage() * 2);
+                }
+            }
+
+            if(card1.getDamage() > card2.getDamage()) { //card1  wins
+                winnerMsg = card1.getName() + " wins";
+            }
+            else if(card1.getDamage() < card2.getDamage()) { //card2 wins
+                winnerMsg = card2.getName() + " wins";
+            }
+            else { //draw
+                winnerMsg = "Draw (no action)";
+            }
         }
         //MIXED FIGHT
         else {
             System.out.println("You are mixed!");
+
         }
 
 
