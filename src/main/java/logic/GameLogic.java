@@ -39,9 +39,15 @@ public class GameLogic {
                 .deck(new ArrayList<Card>())
                 .build();
 
+        /*
+        //create User in dummyDB
         if(dummyDB.addUser(user)) {
             return user;
         }
+        */
+
+        //create User in DB:
+
 
         return null;
     }

@@ -121,7 +121,7 @@ public class RestServer implements Runnable {
                     }
                 }
 
-                //SEND REQUEST AND GET ANSWER FROM DB
+                //SEND REQUEST AND GET ANSWER FROM DB - hndleRequest is defined down.
                 RequestAnswer requestAnswer = handleRequest(jsonHeader, jsonContent);
 
                 //ANSWER BACK TO THE CLIENT: Write in the socket the answer
@@ -154,8 +154,6 @@ public class RestServer implements Runnable {
                 }
 
                 //write to the socket
-                //System.out.println("Answer is ");
-                //System.out.println(answer);
                 writer.write(answer, 0, answer.length());
 
                 writer.close();
