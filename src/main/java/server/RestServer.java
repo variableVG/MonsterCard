@@ -64,39 +64,6 @@ public class RestServer implements Runnable {
                         headerMsg = headerMsg + message + "\n";
                     }
 
-                    /*if ("".equals(message)) {
-                        if (map.containsKey("Content-Length")) {
-                            int len = Integer.parseInt(map.get("Content-Length"));
-                            char[] inbuf = new char[len]; // buffer where the reader saves the incoming message.
-                            int readLength = reader.read(inbuf, 0, len);
-                            String content = new String(inbuf);
-
-                            // Parse the json if we got json data
-                            if (map.containsKey("Content-Type")) {
-                                if ("application/json".equals(map.get("Content-Type"))) {
-                                    // we got a json
-                                    JSONObject contentJson = new JSONObject(content);
-                                    System.out.println("Content: " + contentJson.toString());
-                                }
-                            }
-                        }
-                    }
-                    else if (head) {
-                        String[] headSplit = message.split("\\s+");
-                        String method = headSplit[0];
-                        String url = headSplit[1];
-                        map.put("METHOD", method);
-                        map.put("URL", url);
-                        head = false;
-                    }
-                    else {
-                        int idx = message.indexOf(": ");
-                        String key = message.substring(0, idx);
-                        String value = message.substring(idx + 2);
-                        map.put(key, value);
-                        System.out.println("  putting " + key + " : " + value);
-                    }*/
-
                 } while (!message.isEmpty()); //loop ends when the received message is empty
 
                 JSONObject jsonHeader = HTTP.toJSONObject(headerMsg); //get JSON Object
@@ -188,6 +155,7 @@ public class RestServer implements Runnable {
         System.out.println(jsonContent);
 
         RequestAnswer requestAnswer = null;
+        JSONObject jsonAnswer = null;
 
         try {
             if(jsonHeader.getString("Method").equals("POST")) {
@@ -197,8 +165,31 @@ public class RestServer implements Runnable {
                         throw new Exception("user could not be created");
                     }
                     else {
-                        requestAnswer = new RequestAnswer(200, null);
+                        jsonAnswer = new JSONObject();
+                        jsonAnswer.put("username", user.getUsername());
+                        jsonAnswer.put("result", "OK");
+                        jsonAnswer.put("message", "User successfully created");
+                        requestAnswer = new RequestAnswer(200, jsonAnswer);
                     }
+                }
+                else if(jsonHeader.getString("Request-URI").equals("/sessions")) { //LOGIN A USER
+                    User user = gameLogic.loginUser(jsonContent.getString("Username"), jsonContent.getString("Password"));
+                    if(user == null) {
+                        throw new Exception("user could not log-in");
+                    }
+                    else {
+                        jsonAnswer = new JSONObject();
+                        jsonAnswer.put("username", user.getUsername());
+                        jsonAnswer.put("result", "OK");
+                        jsonAnswer.put("message", "User successfully logged-in!");
+                        requestAnswer = new RequestAnswer(200, jsonAnswer);
+                    }
+                }
+                else if(jsonHeader.getString("Request-URI").equals("/packages")) { //CREATE PACKAGE
+                    System.out.printf("I am here!");
+                    String token = jsonHeader.getString("Authorization");
+                    System.out.println("Token is " + token);
+
                 }
             }
             else if(jsonHeader.getString("Method").equals("GET")) {
@@ -212,12 +203,13 @@ public class RestServer implements Runnable {
             }
             else {
                 //throw exception.
+                throw new Exception("No correct option selected");
             }
         }
         catch (Exception e) {
-            HashMap<String, String> errorMessage = new HashMap<String, String>();
-            errorMessage.put("ErrorMessage", e.getMessage());
-            JSONObject jsonAnswer = new JSONObject(errorMessage);
+            jsonAnswer = new JSONObject();
+            jsonAnswer.put("result", "ERR");
+            jsonAnswer.put("message", e.getMessage());
             requestAnswer = new RequestAnswer(500, jsonAnswer);
             return requestAnswer;
         }

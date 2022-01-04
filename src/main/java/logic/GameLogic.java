@@ -1,5 +1,6 @@
 package logic;
 
+import DB.DbHandler;
 import dummyDB.DummyUserDB;
 import logic.cards.Card;
 import lombok.Data;
@@ -15,60 +16,47 @@ public class GameLogic {
     private static final int PRICE_PACKAGE = 5;
 
     public DummyUserDB dummyDB;
+    public DbHandler dbHandler;
 
     public GameLogic() {
         dummyDB = new DummyUserDB();
+        dbHandler = new DbHandler();
     }
 
 
     //user
     public User createUser(String username, String password) {
-        /*
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Please enter Username: ");
-        String username = scanner.nextLine();
-        System.out.print("Please enter password: ");
-        String password = scanner.nextLine();
-        */
+        return dbHandler.createUniqueUser(username, password);
 
-        User user = User.builder()
-                .username(username)
-                .password(password)
-                .coins(20)
-                .stack(new ArrayList<Card>())
-                .deck(new ArrayList<Card>())
-                .build();
-
-        /*
-        //create User in dummyDB
-        if(dummyDB.addUser(user)) {
-            return user;
-        }
-        */
-
-        //create User in DB:
-
-
-        return null;
     }
 
     public User loginUser(String username, String password) {
-        User user = dummyDB.getUserByName(username);
+        User user = dbHandler.loginUser(username, password);
         if(user == null) {
-            System.out.println("user does not exist");
-            return null;
+            System.out.println("user does not exist or password is incorrect");
         }
-        if(user.getPassword().equals(password)) {
-            return user;
-        }
-        else {
-            System.out.println("Password does not match");
-        }
-        return null;
+        return user;
     }
 
-    public void addPackageToDB(ArrayList<Card> cards) {
-        dummyDB.cardPackages.add(cards);
+    public boolean addPackageToDB(ArrayList<Card> cards, String token) throws Exception {
+        //dummyDB.cardPackages.add(cards);
+
+        //Check that the ArrayList cards has length 5:
+        if(cards.size() != 5) {
+            System.out.println("A package must contain 5 cards");
+            return false;
+        }
+
+        //Just Admin can add packages to the DB. We check that the token belongs to the admin.
+        User user = dbHandler.getUserByToken("token");
+        if(!user.getUsername().equals("admin")) {
+            System.out.println("User must be admin to create add Packages to the DB");
+            return false;
+        }
+
+        //Add cards to the DB:
+        dbHandler.addPackageToDB(cards, user.getUsername());
+        return true;
     }
 
     public int acquirePackage(User user) {

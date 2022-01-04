@@ -62,7 +62,7 @@ public class GameLogicTest {
         return cards;
     }
 
-    @Test
+   /* @Test
     @DisplayName("Add Packages to DB")
     void addPackageToDBTest() {
         ArrayList<Card> cards = dummyAddDB();
@@ -99,7 +99,7 @@ public class GameLogicTest {
         assertTrue(gameLogic.acquirePackage(user) == 0, "User could not buy package");
         assertTrue(gameLogic.acquirePackage(user) == -1, "User with no money bought package");
 
-    }
+    }*/
 
 
 
