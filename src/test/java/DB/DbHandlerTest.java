@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -73,5 +74,14 @@ public class DbHandlerTest {
 
         dbHandler.addPackageToDB(cards, "admin");
 
+    }
+
+    @Test void acquirePackageTest() {
+        Collection<Card> cards = new ArrayList<>();
+        cards = dbHandler.acquirePackage();
+
+        for(Card card : cards) {
+            System.out.println(card.getName());
+        }
     }
 }

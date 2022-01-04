@@ -3,11 +3,13 @@ package server;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 import logic.GameLogic;
 import logic.User;
 import org.json.HTTP;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class RestServer implements Runnable {
@@ -83,7 +85,21 @@ public class RestServer implements Runnable {
                     if (jsonHeader.has("Content-Type")) {
                         String contentType = jsonHeader.getString("Content-Type");
                         if ("application/json".equals(contentType)) { //check if what we get is a json.
-                            jsonContent = new JSONObject(contentMsg);
+                            System.out.println("Content message is" + contentMsg);
+                            if(contentMsg.isEmpty()) {
+                                jsonContent = null;
+                            }
+                            else if(contentMsg.charAt(0) =='['){ //If the content is an array:
+                                System.out.println("es un array");
+                                JSONArray jsonArray = new JSONArray(contentMsg);
+                                jsonContent = new JSONObject();
+                                jsonContent.put("cards", jsonArray);
+
+                            }
+                            else {
+                                jsonContent = new JSONObject(contentMsg);
+                            }
+
                         }
                     }
                 }
@@ -186,9 +202,32 @@ public class RestServer implements Runnable {
                     }
                 }
                 else if(jsonHeader.getString("Request-URI").equals("/packages")) { //CREATE PACKAGE
-                    System.out.printf("I am here!");
                     String token = jsonHeader.getString("Authorization");
-                    System.out.println("Token is " + token);
+                    JSONArray cards = jsonContent.getJSONArray("cards");
+                    if(gameLogic.addPackageToDB(cards, token)) {
+                        jsonAnswer = new JSONObject();
+                        jsonAnswer.put("result", "OK");
+                        jsonAnswer.put("message", "Package successfully added");
+                        requestAnswer = new RequestAnswer(200, jsonAnswer);
+                    }
+                    else {
+                        throw new Exception("Package could not be added");
+                    }
+
+                }
+                else if(jsonHeader.getString("Request-URI").equals("/transactions/packages")) {
+                    String token = jsonHeader.getString("Authorization");
+                    Object cardsInJson = gameLogic.acquirePackage(token);
+                    if(cardsInJson != null){
+                        jsonAnswer = new JSONObject();
+                        jsonAnswer.put("result", "OK");
+                        jsonAnswer.put("message", "package has been acquired");
+                        jsonAnswer.put("cards", cardsInJson);
+                        requestAnswer = new RequestAnswer(200, jsonAnswer);
+                    }
+                    else {
+                        throw new Exception("Package could not be added");
+                    }
 
                 }
             }

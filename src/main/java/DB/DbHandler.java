@@ -247,6 +247,79 @@ public class DbHandler {
         return true;
     }
 
+    public Collection<Card> acquirePackage() {
+        ArrayList<Card> cards = new ArrayList<>();
+        int packageId = 0;
+        String sqlStatement = "SELECT * FROM cards JOIN packages_cards USING(card_id) " +
+                            "WHERE package_id = (SELECT MAX (package_id) FROM packages_cards); ";
+
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            ResultSet resultSet = statement.executeQuery();
+
+            while( resultSet.next() ) {
+                Card card = new Card(resultSet.getString("card_id"), resultSet.getString("name"), resultSet.getDouble("damage"));
+                cards.add(card);
+                packageId = resultSet.getInt("package_id");
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+        //delete package:
+        deletePackage(packageId);
+
+        return cards;
+    }
+
+    public boolean addCardToUser(String username, String card_id) {
+        String sqlStatement = "INSERT INTO users_cards(username, card_id) VALUES(?, ?);";
+
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            statement.setString(1, username);
+            statement.setString(2, card_id);
+            statement.execute();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean deletePackage(int packageId) {
+        String sqlStatement = "DELETE from packages where package_id = ?; " +
+                "       DELETE from packages_cards where package_id = ?;";
+
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            statement.setInt(1, packageId);
+            statement.setInt(2, packageId);
+            statement.execute();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            return false;
+        }
+
+        return true;
+
+    }
+
+    public boolean setCoins(String username, int coins) {
+        String sqlStatement = "UPDATE users SET coins = ? WHERE username = ?";
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            statement.setInt(1, coins);
+            statement.setString(2, username);
+            statement.execute();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
 
 
 }

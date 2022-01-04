@@ -50,6 +50,7 @@ public class GameLogicTest {
 
     }
 
+
     static ArrayList<Card> dummyAddDB() {
         Card card1 = new MonsterCard("a", "WaterGoblin", 10.0);
         Card card2 = new MonsterCard("b", "Dragon", 50.0);
@@ -60,6 +61,12 @@ public class GameLogicTest {
         ArrayList<Card> cards = new ArrayList<Card>();
         cards.add(card1); cards.add(card2); cards.add(card3); cards.add(card4); cards.add(card5);
         return cards;
+    }
+
+
+    @Test
+    void acquirePackageTest() throws Exception {
+        gameLogic.acquirePackage("Basic altenhof-mtcgToken");
     }
 
    /* @Test
