@@ -79,6 +79,10 @@ public class GameLogic {
     public Object acquirePackage(String token) throws Exception {
         //Get user:
         User user = dbHandler.getUserByToken(token);
+        //Check if user exists:
+        if (user == null) {
+            throw new Exception("User does not exist");
+        }
 
         //Check if user has money to buy the cards
         if(user.getCoins() < 5) {
@@ -103,6 +107,24 @@ public class GameLogic {
         //set money in the DB:
         if(!dbHandler.setCoins(user.getUsername(), user.getCoins() )) {
             System.out.println("Problem setting the coins");
+        }
+
+        //Convert Array in Json to answer back:
+        JSONArray cardsInJson = new JSONArray(cardPackage);
+        return cardsInJson;
+    }
+
+    public JSONArray getUserCards(String token) throws Exception {
+        User user = dbHandler.getUserByToken(token);
+
+        if (user == null) {
+            throw new Exception("User does not exist");
+        }
+
+        //Get Cards:
+        Collection<Card> cardPackage = dbHandler.getUserCards(user.getUsername());
+        if(cardPackage.isEmpty()) {
+            throw new Exception("User has no cards");
         }
 
         //Convert Array in Json to answer back:

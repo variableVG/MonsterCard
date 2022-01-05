@@ -320,6 +320,26 @@ public class DbHandler {
         return true;
     }
 
+    public Collection<Card> getUserCards(String username) {
+        ArrayList<Card> cards = new ArrayList<>();
 
+        String sqlStatement = "SELECT * FROM cards JOIN users_cards USING(card_id)\n" +
+                "WHERE username = ?; ";
+
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            statement.setString(1, username);
+            ResultSet resultSet = statement.executeQuery();
+
+            while( resultSet.next() ) {
+                Card card = new Card(resultSet.getString("card_id"), resultSet.getString("name"), resultSet.getDouble("damage"));
+                cards.add(card);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+        return cards;
+    }
 
 }

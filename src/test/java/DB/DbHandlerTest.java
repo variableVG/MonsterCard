@@ -84,4 +84,14 @@ public class DbHandlerTest {
             System.out.println(card.getName());
         }
     }
+
+    @Test void getUserCardsTest() {
+        Collection<Card> cards = new ArrayList<>();
+        cards = dbHandler.getUserCards("altenhof");
+
+        for(Card card : cards) {
+            System.out.println(card.getName() + " with Id " + card.getId() + " and damage " + card.getDamage());
+        }
+
+    }
 }

@@ -2,6 +2,7 @@ package logic;
 import logic.cards.Card;
 import logic.cards.MonsterCard;
 import logic.cards.SpellCard;
+import org.json.JSONArray;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.sql.Array;
 import java.util.ArrayList;
+import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
@@ -67,6 +69,12 @@ public class GameLogicTest {
     @Test
     void acquirePackageTest() throws Exception {
         gameLogic.acquirePackage("Basic altenhof-mtcgToken");
+    }
+
+    @Test
+    void getUserCardsTest() throws Exception {
+        JSONArray cardsInJson = gameLogic.getUserCards("Basic kienboec-mtcgToken");
+        System.out.println(cardsInJson);
     }
 
    /* @Test

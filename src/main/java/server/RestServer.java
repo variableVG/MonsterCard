@@ -232,7 +232,21 @@ public class RestServer implements Runnable {
                 }
             }
             else if(jsonHeader.getString("Method").equals("GET")) {
+                if(jsonHeader.getString("Request-URI").equals("/cards")){
+                    String token = jsonHeader.getString("Authorization");
+                    Object cardsInJson = gameLogic.getUserCards(token);
+                    if(cardsInJson != null){
+                        jsonAnswer = new JSONObject();
+                        jsonAnswer.put("result", "OK");
+                        jsonAnswer.put("message", "cards successfully accessed");
+                        jsonAnswer.put("cards", cardsInJson);
+                        requestAnswer = new RequestAnswer(200, jsonAnswer);
+                    }
+                    else {
+                        throw new Exception("User has no cards or they could not be found");
+                    }
 
+                }
             }
             else if(jsonHeader.getString("Method").equals("PUT")) {
 
