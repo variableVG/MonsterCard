@@ -3,6 +3,7 @@ import logic.cards.Card;
 import logic.cards.MonsterCard;
 import logic.cards.SpellCard;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -75,6 +76,28 @@ public class GameLogicTest {
     void getUserCardsTest() throws Exception {
         JSONArray cardsInJson = gameLogic.getUserCards("Basic kienboec-mtcgToken");
         System.out.println(cardsInJson);
+    }
+
+    @Test
+    void showUserDeck() throws Exception{
+        JSONArray cardsInJson = gameLogic.showUserDeck("Basic kienboec-mtcgToken");
+        System.out.println(cardsInJson);
+
+    }
+
+    @Test
+    void configureDeckTest() throws Exception {
+        JSONArray cardsInJson = new JSONArray();
+        cardsInJson.put("b2237eca-0271-43bd-87f6-b22f70d42ca4");
+        cardsInJson.put("9e8238a4-8a7a-487f-9f7d-a8c97899eb48");
+        cardsInJson.put("d60e23cf-2238-4d49-844f-c7589ee5342e");
+        cardsInJson.put("fc305a7a-36f7-4d30-ad27-462ca0445649");
+        String token = "Basic kienboec-mtcgToken";
+
+        gameLogic.configureDeck(cardsInJson, token);
+        JSONArray cardsInJson2 = new JSONArray();
+        cardsInJson2 = gameLogic.showUserDeck(token);
+        System.out.println(cardsInJson2);
     }
 
    /* @Test

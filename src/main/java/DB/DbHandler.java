@@ -50,7 +50,11 @@ public class DbHandler {
                 "           CREATE TABLE IF NOT EXISTS users_cards (" +
                 "                   username VARCHAR(50) REFERENCES users (username) ON UPDATE CASCADE ON DELETE CASCADE," +
                 "                   card_id VARCHAR(50) REFERENCES cards (card_id) ON UPDATE CASCADE ON DELETE CASCADE" +
-                "                   );\n" +
+                "                   );" +
+                "           CREATE TABLE IF NOT EXISTS deck_cards (" +
+                "                   username VARCHAR(50) REFERENCES users(username) ON UPDATE CASCADE ON DELETE CASCADE," +
+                "                   card_id VARCHAR(50) REFERENCES cards (card_id) ON UPDATE CASCADE ON DELETE CASCADE);" +
+                "                    \n" +
                 "           ";
         try {
             DbConnection.getInstance().executeSql(dbSentence);
@@ -251,7 +255,7 @@ public class DbHandler {
         ArrayList<Card> cards = new ArrayList<>();
         int packageId = 0;
         String sqlStatement = "SELECT * FROM cards JOIN packages_cards USING(card_id) " +
-                            "WHERE package_id = (SELECT MAX (package_id) FROM packages_cards); ";
+                            "WHERE package_id = (SELECT MIN (package_id) FROM packages_cards); ";
 
         try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
         ) {
@@ -342,4 +346,76 @@ public class DbHandler {
         return cards;
     }
 
+    public Collection<Card> showUserDeck(String username) {
+        ArrayList<Card> cards = new ArrayList<>();
+
+        String sqlStatement = "SELECT * FROM cards JOIN deck_cards USING(card_id)\n" +
+                "WHERE username = ?; ";
+
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            statement.setString(1, username);
+            ResultSet resultSet = statement.executeQuery();
+
+            while( resultSet.next() ) {
+                Card card = new Card(resultSet.getString("card_id"), resultSet.getString("name"), resultSet.getDouble("damage"));
+                cards.add(card);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+        return cards;
+    }
+
+    public boolean doesCardBelongsToUser(String username, String cardId) {
+        String user = "";
+        String sqlStatement = "SELECT username FROM users_cards WHERE card_id = ?";
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            statement.setString(1, cardId);
+            ResultSet resultSet = statement.executeQuery();
+
+            if( resultSet.next() ) {
+                user = resultSet.getString("username");
+                if(!user.equals(username)) {
+                    System.out.println(cardId + " does not belong to user " + username + "but to user " + user);
+                    return false;
+                }
+            }
+            else {
+                System.out.println("This card is not in the database");
+                return false;
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return true;
+    }
+
+    public void deleteDeckFromUser(String username) {
+        String sqlStatement = "DELETE FROM deck_cards WHERE username = ?";
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            statement.setString(1, username);
+            statement.execute();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    public void addCardToDeck(String username, String cardId) {
+        String sqlStatement = "INSERT INTO deck_cards(username, card_id) VALUES(?, ?)";
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            statement.setString(1, username);
+            statement.setString(2, cardId);
+            statement.execute();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+    }
 }

@@ -36,6 +36,7 @@ public class DbHandlerTest {
         dbHandler.createUniqueUser("vio", "1234");
         dbHandler.createUniqueUser("user2", "22222");
         dbHandler.createUniqueUser("vio", "34456");
+        dbHandler.createUniqueUser("altenhof", "markus");
     }
 
     @Test
@@ -47,8 +48,9 @@ public class DbHandlerTest {
         assertTrue(dbHandler.loginUser("kienboec", "Daniel2") == null , "User with wrong password could login");
 
         //Check if user with correct username and password can log-in
-        User user = dbHandler.createUniqueUser("vio", "123");
-        assertTrue(dbHandler.loginUser("vio", "123").equals(user), "User with correct password and username could not login");
+        User user = dbHandler.createUniqueUser("altenhof", "markus");
+        assertTrue(dbHandler.loginUser("altenhof", "markus").equals(user), "User with correct password and username could not login");
+
 
     }
 
@@ -92,6 +94,22 @@ public class DbHandlerTest {
         for(Card card : cards) {
             System.out.println(card.getName() + " with Id " + card.getId() + " and damage " + card.getDamage());
         }
+
+    }
+
+    @Test
+    void showUserDeck() throws Exception {
+        User user = dbHandler.createUniqueUser("altenhof", "markus");
+        //addPackageToDBTest();
+        Collection<Card> cards = new ArrayList<>();
+        cards = dbHandler.acquirePackage();
+        for(Card card : cards) {
+            dbHandler.addCardToUser("altenhof", card.getId());
+        }
+
+        dbHandler.showUserDeck("altenhof");
+
+
 
     }
 }

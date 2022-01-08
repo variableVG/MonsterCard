@@ -238,18 +238,40 @@ public class RestServer implements Runnable {
                     if(cardsInJson != null){
                         jsonAnswer = new JSONObject();
                         jsonAnswer.put("result", "OK");
-                        jsonAnswer.put("message", "cards successfully accessed");
+                        jsonAnswer.put("message", "User cards successfully accessed");
                         jsonAnswer.put("cards", cardsInJson);
                         requestAnswer = new RequestAnswer(200, jsonAnswer);
                     }
                     else {
                         throw new Exception("User has no cards or they could not be found");
                     }
-
+                }
+                else if(jsonHeader.getString("Request-URI").equals("/deck")){
+                    String token = jsonHeader.getString("Authorization");
+                    Object cardsInJson = gameLogic.showUserDeck(token);
+                    if(cardsInJson != null){
+                        jsonAnswer = new JSONObject();
+                        jsonAnswer.put("result", "OK");
+                        jsonAnswer.put("message", "Deck cards successfully accessed");
+                        jsonAnswer.put("cards", cardsInJson);
+                        requestAnswer = new RequestAnswer(200, jsonAnswer);
+                    }
+                    else {
+                        throw new Exception("Deck is not configured or empty");
+                    }
                 }
             }
             else if(jsonHeader.getString("Method").equals("PUT")) {
-
+                if(jsonHeader.get("Request-URI").equals("/deck")) {
+                    String token = jsonHeader.getString("Authorization");
+                    JSONArray cards = jsonContent.getJSONArray("cards");
+                    if(gameLogic.configureDeck(cards, token)) {
+                        jsonAnswer = new JSONObject();
+                        jsonAnswer.put("result", "OK");
+                        jsonAnswer.put("message", "Deck cards successfully added");
+                        requestAnswer = new RequestAnswer(200, jsonAnswer);
+                    }
+                }
             }
             else if(jsonHeader.getString("Method").equals("DELETE")) {
 

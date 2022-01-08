@@ -132,9 +132,59 @@ public class GameLogic {
         return cardsInJson;
     }
 
+    public JSONArray showUserDeck(String token) throws Exception {
+        User user = dbHandler.getUserByToken(token);
+
+        if (user == null) {
+            throw new Exception("User does not exist");
+        }
+
+        //Get Cards:
+        Collection<Card> cardPackage = dbHandler.showUserDeck(user.getUsername());
+        if(cardPackage.isEmpty()) {
+            throw new Exception("Deck is not configured or empty");
+        }
+
+        //Convert Array in Json to answer back:
+        JSONArray cardsInJson = new JSONArray(cardPackage);
+        return cardsInJson;
+    }
+
     public Battle startBattle(User user1, User user2) {
         //startBattle() initializes the battle constructor. The battle itself takes place inside the Battle class.
         Battle battle = new Battle(user1, user2);
         return battle;
+    }
+
+    public boolean configureDeck(JSONArray cardsInJson, String token) throws Exception {
+        //Check length of cardsInJson (should be 4).
+        System.out.println("Card in configureDeck are " + cardsInJson);
+        if(cardsInJson.isEmpty() || cardsInJson.length() == 0) {
+            throw new Exception("No cards selected for deck");
+        }
+        else if(cardsInJson.length() != 4) {
+            throw new Exception("A Deck should have 4 cards but user has selected " + cardsInJson.length() + " cards.");
+        }
+
+        //Check if the cards really belonged to the user.
+        User user = dbHandler.getUserByToken(token);
+        System.out.println("User is " + user.getUsername());
+        for (Object o : cardsInJson) {
+            // the Object o corresponds to the card_id.
+            if(!dbHandler.doesCardBelongsToUser(user.getUsername(), o.toString())) {
+                throw new Exception("Card " + o.toString() + " does not belong to " + user.getUsername());
+            }
+        }
+
+        //Delete previous deck
+        dbHandler.deleteDeckFromUser(user.getUsername());
+
+        //Add new deck
+        for(Object o : cardsInJson) {
+            dbHandler.addCardToDeck(user.getUsername(), o.toString());
+        }
+
+        return true;
+
     }
 }
