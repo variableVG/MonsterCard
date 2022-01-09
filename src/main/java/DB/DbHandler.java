@@ -140,19 +140,17 @@ public class DbHandler {
                 System.out.println("User does not exist");
             }
             else {  //if user exists.
-                //System.out.println(resultSet.getString("username"));
-                //System.out.println(resultSet.getString("password"));
-                //System.out.println(resultSet.getInt("coins"));
-
-                //generate random string as a token
                 String token = "Basic " + resultSet.getString("username") + "-mtcgToken";
+                ArrayList<Card> cardsInStack = getUserCards(username);
+                ArrayList<Card> cardsInDeck = (ArrayList<Card>) showUserDeck(username);
                 user = User.builder()
                         .username(resultSet.getString("username"))
                         .password(resultSet.getString("password"))
                         .coins(resultSet.getInt("coins"))
+                        .eloScore(resultSet.getInt("elo_score"))
                         .token(token)
-                        .stack(new ArrayList<Card>()) // TODO: Cards
-                        .deck(new ArrayList<Card>()) //TODO: Cards
+                        .stack(cardsInStack) //
+                        .deck(cardsInDeck) //
                         .build();
 
                 //Set token inn the DB:
@@ -197,6 +195,7 @@ public class DbHandler {
                 String username = resultSet.getString("username");
                 String password = resultSet.getString("password");
                 Integer coins = resultSet.getInt("coins");
+                Integer elo = resultSet.getInt("elo_score");
                 //getCards:
                 ArrayList<Card> cardsInStack = getUserCards(username);
                 ArrayList<Card> cardsInDeck = (ArrayList<Card>) showUserDeck(username);
@@ -206,6 +205,48 @@ public class DbHandler {
                         .password(password) // maybe password should not be included
                         .coins(coins)
                         .token(token)
+                        .eloScore(elo)
+                        .stack(cardsInStack)
+                        .deck(cardsInDeck)
+                        .build();
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return user;
+    }
+
+    public User getUserByUsername(String username) {
+        User user = null;
+        String sqlStatement = "SELECT * FROM users WHERE username = ?";
+
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            statement.setString(1, username);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (!resultSet.next()) { // if username does not exist
+                throw new Exception("Token does not exist in the DB");
+            }
+            else {
+                String token = resultSet.getString("token");
+                String password = resultSet.getString("password");
+                Integer coins = resultSet.getInt("coins");
+                Integer elo = resultSet.getInt("elo_score");
+                //getCards:
+                ArrayList<Card> cardsInStack = getUserCards(username);
+                ArrayList<Card> cardsInDeck = (ArrayList<Card>) showUserDeck(username);
+
+                user = User.builder()
+                        .username(username)
+                        .password(password) // maybe password should not be included
+                        .coins(coins)
+                        .token(token)
+                        .eloScore(elo)
                         .stack(cardsInStack)
                         .deck(cardsInDeck)
                         .build();
@@ -307,6 +348,22 @@ public class DbHandler {
         return true;
     }
 
+    public boolean deleteCardFromUser(String username, String card_id) {
+        String sqlStatement = "DELETE FROM users_cards WHERE username = ? AND card_id = ?;";
+
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            statement.setString(1, username);
+            statement.setString(2, card_id);
+            statement.execute();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            return false;
+        }
+
+        return true;
+    }
+
     public boolean deletePackage(int packageId) {
         String sqlStatement = "DELETE from packages where package_id = ?; " +
                 "       DELETE from packages_cards where package_id = ?;";
@@ -330,6 +387,20 @@ public class DbHandler {
         try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
         ) {
             statement.setInt(1, coins);
+            statement.setString(2, username);
+            statement.execute();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    public boolean setElo(String username, int eloScore) {
+        String sqlStatement = "UPDATE users SET elo_score = ? WHERE username = ?";
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            statement.setInt(1, eloScore);
             statement.setString(2, username);
             statement.execute();
         } catch (SQLException throwables) {

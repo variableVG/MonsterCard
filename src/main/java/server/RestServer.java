@@ -234,7 +234,15 @@ public class RestServer implements Runnable {
 
                 }
                 else if(jsonHeader.getString("Request-URI").equals("/battles")) {
-                    System.out.println("Great!");
+                    String token = jsonHeader.getString("Authorization");
+                    JSONObject battleLog = gameLogic.startBattle(token);
+                    if(battleLog != null) {
+                        jsonAnswer = new JSONObject();
+                        jsonAnswer.put("result", "OK");
+                        jsonAnswer.put("battle Result",battleLog);
+                        requestAnswer = new RequestAnswer(200, jsonAnswer);
+
+                    }
                 }
             }
             else if(jsonHeader.getString("Method").equals("GET")) {
@@ -265,6 +273,21 @@ public class RestServer implements Runnable {
                     else {
                         throw new Exception("Deck is not configured or empty");
                     }
+                }
+                else if(jsonHeader.getString("Request-URI").equals("/deck?format=plain")) {
+                    String token = jsonHeader.getString("Authorization");
+                    Object cardsInJson = gameLogic.showUserDeck(token);
+                    if(cardsInJson != null){
+                        jsonAnswer = new JSONObject();
+                        jsonAnswer.put("result", "OK");
+                        jsonAnswer.put("message", "Deck cards successfully accessed");
+                        jsonAnswer.put("cards", cardsInJson);
+                        requestAnswer = new RequestAnswer(200, jsonAnswer);
+                    }
+                    else {
+                        throw new Exception("Deck is not configured or empty");
+                    }
+
                 }
                 else if(jsonHeader.getString("Request-URI").contains("/users/")) {
                     //get the last part of Request-URI with user

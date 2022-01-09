@@ -100,6 +100,11 @@ public class GameLogicTest {
         System.out.println(cardsInJson2);
     }
 
+    @Test
+    void startBattleTest() {
+        gameLogic.startBattle("user1");
+    }
+
    /* @Test
     @DisplayName("Add Packages to DB")
     void addPackageToDBTest() {

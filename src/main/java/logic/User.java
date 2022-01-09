@@ -19,6 +19,7 @@ public class User {
     private String password;
     private String token; //After login a token is generated
     private int coins;
+    private int eloScore;
 
     //a stack is the collection of all his current cards
     ArrayList<Card> stack;

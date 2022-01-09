@@ -2,6 +2,7 @@ package logic;
 
 import DB.DbHandler;
 import dummyDB.DummyUserDB;
+import kotlin.Pair;
 import logic.cards.Card;
 import lombok.Data;
 import org.json.JSONArray;
@@ -151,10 +152,31 @@ public class GameLogic {
         return cardsInJson;
     }
 
-    public Battle startBattle(User user) {
-        //startBattle() initializes the battle constructor. The battle itself takes place inside the Battle class.
-        Battle battle = new Battle(user);
-        return battle;
+    public JSONObject startBattle(String token) {
+        /** This function calls the startBattle in the DbHandler class. It gives back a pair with the battleId and
+         * the opponent's username if there is already an open battle. Otherwise instead of the opponent's username returns
+         * an empty string.
+         * */
+        User user = dbHandler.getUserByToken(token);
+        JSONObject battleResult = new JSONObject();
+
+        Battle battle = null;
+        Pair<Integer, String> battleData = dbHandler.startBattle(user.getUsername());
+        int battleId = battleData.getFirst();
+        String opponentUsername = battleData.getSecond();
+
+        if(opponentUsername.isEmpty()) {
+            battleResult.put("message", "Battle created with id " + battleId + ". Waiting for opponent to join.");
+        }
+        else {
+            User player1 = dbHandler.getUserByUsername(opponentUsername);
+            User player2 = user;
+            battle = new Battle(player1, player2, battleId, dbHandler);
+            battleResult = battle.battleFight(player1, player2);
+            battleResult.put("ELO Score Player " + player1.getUsername(), dbHandler.getUserEloScore(player1.getUsername()));
+            battleResult.put("ELO Score Player " + player2.getUsername(), dbHandler.getUserEloScore(player2.getUsername()));
+        }
+        return battleResult;
     }
 
     public boolean configureDeck(JSONArray cardsInJson, String token) throws Exception {
