@@ -1,4 +1,5 @@
 package DB;
+import kotlin.Pair;
 import logic.User;
 import logic.cards.Card;
 
@@ -56,7 +57,12 @@ public class DbHandler {
                 "           CREATE TABLE IF NOT EXISTS deck_cards (" +
                 "                   username VARCHAR(50) REFERENCES users(username) ON UPDATE CASCADE ON DELETE CASCADE," +
                 "                   card_id VARCHAR(50) REFERENCES cards (card_id) ON UPDATE CASCADE ON DELETE CASCADE);" +
-                "                    \n" +
+                "                    " +
+                "           CREATE TABLE IF NOT EXISTS battles ( " +
+                "                   battle_id SERIAL PRIMARY KEY," +
+                "                   player1 VARCHAR(50) NOT NULL REFERENCES users(username) ON UPDATE CASCADE ON DELETE CASCADE, " +
+                "                   player2 VARCHAR(50) REFERENCES users(username) ON UPDATE CASCADE ON DELETE CASCADE," +
+                "                   winner VARCHAR(50)); \n" +
                 "           ";
         try {
             DbConnection.getInstance().executeSql(dbSentence);
@@ -477,6 +483,55 @@ public class DbHandler {
             throwables.printStackTrace();
         }
         return scores;
+    }
+
+    public Pair startBattle(String username) {
+        /** This function checks if there is already an open battle, if that is the case, it adds the username as player2.
+         *  and returns the battle_id and username of opponent. If a battle has not been open yet, it will open a new one. It returns
+         *  an empty string then.
+         **/
+
+        //This pair contains the battle_id (integer) and the opponent's username.
+        Pair<Integer, String> pair = null;
+        int battleId = 0;
+        String opponentUsername = "";
+
+        String sqlStatement = "SELECT * FROM battles WHERE player2 IS NULL ORDER BY battle_id DESC";
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            ResultSet resultSet = statement.executeQuery();
+            if(!resultSet.next()) { //If there is not an open battle, create a new one.
+                String sqlStatement2 = "INSERT INTO battles(player1) VALUES(?) RETURNING battle_id;";
+                try(PreparedStatement statement2 = DbConnection.getInstance().prepareStatement(sqlStatement2)) {
+                    statement2.setString(1, username);
+                    ResultSet resultSet2 = statement2.executeQuery();
+                    resultSet2.next(); //I need to call next because message error: Das ResultSet ist nicht richtig positioniert. Eventuell muss 'next' aufgerufen werden.
+                    battleId = resultSet2.getInt("battle_id");
+                }
+            }
+            else {
+                do { //If there is already an open battle, insert username as player2 and get username from opponent.
+                    battleId = resultSet.getInt("battle_id");
+                    opponentUsername = resultSet.getString("player1");
+                    if(!opponentUsername.equals(username)) { // to avoid that a User plays with itself
+                        String sqlStatement2 = "UPDATE battles SET player2 = ? WHERE battle_id = ?;";
+                        try(PreparedStatement statement2 = DbConnection.getInstance().prepareStatement(sqlStatement2)) {
+                            statement2.setString(1, username);
+                            statement2.setInt(2, battleId);
+                            statement2.execute();
+                        }
+                        break;
+                    }
+                } while(resultSet.next());
+            }
+
+            pair = new Pair<>(battleId, opponentUsername);
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+        return pair;
     }
 
 }

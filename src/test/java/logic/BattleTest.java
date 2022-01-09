@@ -27,7 +27,7 @@ public class BattleTest {
         gameLogic = new GameLogic();
         user1 = gameLogic.createUser("kienboec", "daniel");
         user2 = gameLogic.createUser("altenhof", "markus");
-        battle = gameLogic.startBattle(user1, user2);
+        //battle = gameLogic.startBattle(user1, user2);
 
         //set deck for user 1
         ArrayList<Card> deckUser1 = new ArrayList<Card>();

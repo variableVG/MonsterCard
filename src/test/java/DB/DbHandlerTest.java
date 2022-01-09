@@ -122,7 +122,7 @@ public class DbHandlerTest {
     }
 
     @Test
-    void getScoreboard() {
+    void getScoreboardTest() {
         HashMap<String, Integer> scores = dbHandler.getScores();
 
         Iterator iterator = scores.entrySet().iterator();
@@ -130,5 +130,17 @@ public class DbHandlerTest {
             Map.Entry pair = (Map.Entry)iterator.next();
             System.out.println(pair.getKey() + ", " + pair.getValue());
         }
+    }
+
+    @Test
+    void startBattleTest() {
+        dbHandler.createUniqueUser("user1", "1");
+        dbHandler.createUniqueUser("user2", "2");
+        dbHandler.createUniqueUser("user3", "2");
+
+        dbHandler.startBattle("user1");
+        dbHandler.startBattle("user2");
+        dbHandler.startBattle("user3");
+        dbHandler.startBattle("user1");
     }
 }

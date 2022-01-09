@@ -151,9 +151,9 @@ public class GameLogic {
         return cardsInJson;
     }
 
-    public Battle startBattle(User user1, User user2) {
+    public Battle startBattle(User user) {
         //startBattle() initializes the battle constructor. The battle itself takes place inside the Battle class.
-        Battle battle = new Battle(user1, user2);
+        Battle battle = new Battle(user);
         return battle;
     }
 

@@ -8,13 +8,22 @@ import java.util.Random;
 @Data
 public class Battle {
 
-    private User user1;
-    private User user2;
+    private User player1;
+    private User player2;
     public static final int STANDARD_DAMAGE = 5;
 
-    public Battle(User u1, User u2) {
-        this.setUser1(u1);
-        this.setUser2(u2);
+    public Battle(User player) {
+        /** When a user wants to battle, a new Battle-object is created. In the constructor will be then check,
+         * if there is an open battle in the DB that is waiting for a second player:
+         *      - If there is an open battle, the user will be added to this second battle as player2 or playerB. An open
+         *          battle is noticed because player2 will be null.
+         *      - If there is no an open battle, the user will be start a battle (new entry in the battle DB) and waits
+         *          for a second player to join as a player2. Once a second player has logged-in, the battle will start.
+         * */
+
+        //Check if there is a battle already open and add user to that battle.
+
+        //Otherwise start a new battle.
     }
 
     Card getCardFromDeck(User user, int randomIndex) {
