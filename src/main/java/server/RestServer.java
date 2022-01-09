@@ -5,12 +5,15 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.regex.Pattern;
 
 import logic.GameLogic;
 import logic.User;
 import org.json.HTTP;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import javax.naming.ldap.HasControls;
 
 public class RestServer implements Runnable {
     private static int port = 10001;
@@ -230,6 +233,9 @@ public class RestServer implements Runnable {
                     }
 
                 }
+                else if(jsonHeader.getString("Request-URI").equals("/battles")) {
+                    System.out.println("Great!");
+                }
             }
             else if(jsonHeader.getString("Method").equals("GET")) {
                 if(jsonHeader.getString("Request-URI").equals("/cards")){
@@ -260,9 +266,49 @@ public class RestServer implements Runnable {
                         throw new Exception("Deck is not configured or empty");
                     }
                 }
+                else if(jsonHeader.getString("Request-URI").contains("/users/")) {
+                    //get the last part of Request-URI with user
+                    String username = jsonHeader.getString("Request-URI").substring(jsonHeader.getString("Request-URI").lastIndexOf("/") + 1);
+                    String token = jsonHeader.getString("Authorization");
+                    JSONObject userData = gameLogic.getUserData(username, token);
+                    if(userData != null) {
+                        jsonAnswer = new JSONObject();
+                        jsonAnswer.put("result", "OK");
+                        jsonAnswer.put("User Data", userData);
+                        requestAnswer = new RequestAnswer(200, jsonAnswer);
+                    }
+                    else {
+                        throw new Exception("Token and user do not match");
+                    }
+
+
+                }
+                else if(jsonHeader.getString("Request-URI").equals("/stats")) {
+                    String token = jsonHeader.getString("Authorization");
+                    int elo = gameLogic.getEloScore(token);
+                    jsonAnswer = new JSONObject();
+                    jsonAnswer.put("result", "OK");
+                    jsonAnswer.put("ELO-Score", elo);
+                    requestAnswer = new RequestAnswer(200, jsonAnswer);
+
+                }
+                else if(jsonHeader.getString("Request-URI").equals("/score")){
+                    String token = jsonHeader.getString("Authorization");
+                    HashMap<String, Integer> scores = gameLogic.getScoreboard();
+                    if(!scores.isEmpty()) {
+                        jsonAnswer = new JSONObject();
+                        jsonAnswer.put("result", "OK");
+                        jsonAnswer.put("scoreboard", scores);
+                        requestAnswer = new RequestAnswer(200, jsonAnswer);
+                    }
+                    else {
+                        throw new Exception("An error has occurred while retrieving scoreboard");
+                    }
+
+                }
             }
             else if(jsonHeader.getString("Method").equals("PUT")) {
-                if(jsonHeader.get("Request-URI").equals("/deck")) {
+                if(jsonHeader.getString("Request-URI").equals("/deck")) {
                     String token = jsonHeader.getString("Authorization");
                     JSONArray cards = jsonContent.getJSONArray("cards");
                     if(gameLogic.configureDeck(cards, token)) {
@@ -271,6 +317,24 @@ public class RestServer implements Runnable {
                         jsonAnswer.put("message", "Deck cards successfully added");
                         requestAnswer = new RequestAnswer(200, jsonAnswer);
                     }
+                    else {
+                        throw new Exception("Deck could not be configured");
+                    }
+                }
+                else if(jsonHeader.getString("Request-URI").contains("/user")) {
+                    //get the last part of Request-URI with user
+                    String username = jsonHeader.getString("Request-URI").substring(jsonHeader.getString("Request-URI").lastIndexOf("/") + 1);
+                    String token = jsonHeader.getString("Authorization");
+                    if(gameLogic.updateUser(username, token, jsonContent)) {
+                        jsonAnswer = new JSONObject();
+                        jsonAnswer.put("result", "OK");
+                        jsonAnswer.put("message", "User-data successfully updated");
+                        requestAnswer = new RequestAnswer(200, jsonAnswer);
+                    }
+                    else {
+                        throw new Exception("User-data could not be updated");
+                    }
+
                 }
             }
             else if(jsonHeader.getString("Method").equals("DELETE")) {

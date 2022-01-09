@@ -2,12 +2,10 @@ package DB;
 import logic.User;
 import logic.cards.Card;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 
 public class DbHandler {
     /**
@@ -30,6 +28,10 @@ public class DbHandler {
                 "                    password VARCHAR(50) NOT NULL, \n" +
                 "                    coins NUMERIC DEFAULT 20, \n" +
                 "                    token VARCHAR(50), \n" +
+                "                    name VARCHAR(50), \n" +
+                "                    bio VARCHAR(50), \n" +
+                "                    image VARCHAR(50),   \n" +
+                "                    elo_score NUMERIC DEFAULT 100, \n" +
                 "                    UNIQUE(username, token) " +
                 "                    ); " +
                 "           CREATE TABLE IF NOT EXISTS cards (\n" +
@@ -186,13 +188,20 @@ public class DbHandler {
                 throw new Exception("Token does not exist in the DB");
             }
             else {
+                String username = resultSet.getString("username");
+                String password = resultSet.getString("password");
+                Integer coins = resultSet.getInt("coins");
+                //getCards:
+                ArrayList<Card> cardsInStack = getUserCards(username);
+                ArrayList<Card> cardsInDeck = (ArrayList<Card>) showUserDeck(username);
+
                 user = User.builder()
-                        .username(resultSet.getString("username"))
-                        .password(resultSet.getString("password")) // maybe password should not be included
-                        .coins(resultSet.getInt("coins"))
+                        .username(username)
+                        .password(password) // maybe password should not be included
+                        .coins(coins)
                         .token(token)
-                        .stack(new ArrayList<Card>()) // TODO: Cards
-                        .deck(new ArrayList<Card>()) //TODO: Cards
+                        .stack(cardsInStack)
+                        .deck(cardsInDeck)
                         .build();
             }
 
@@ -324,7 +333,7 @@ public class DbHandler {
         return true;
     }
 
-    public Collection<Card> getUserCards(String username) {
+    public ArrayList<Card> getUserCards(String username) {
         ArrayList<Card> cards = new ArrayList<>();
 
         String sqlStatement = "SELECT * FROM cards JOIN users_cards USING(card_id)\n" +
@@ -418,4 +427,56 @@ public class DbHandler {
         }
 
     }
+
+    public boolean updateUser(String key, Object value, String username) {
+        String sqlStatement = "UPDATE users SET " + key + "= ? WHERE username = ?";
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            statement.setString(1, value.toString());
+            statement.setString(2, username);
+            statement.execute();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    public int getUserEloScore(String username) {
+        int eloScore = -1;
+        String sqlStatement = "SELECT elo_score FROM users WHERE username = ?";
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            statement.setString(1, username);
+            ResultSet resultSet = statement.executeQuery();
+            if(resultSet.next()) {
+                eloScore = resultSet.getInt("elo_score");
+            }
+            else{
+                throw new Exception("User score not found");
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return eloScore;
+    }
+
+    public HashMap getScores(){
+        HashMap<String, Integer> scores = new HashMap<String, Integer>();
+        String sqlStatement = "SELECT username, elo_score FROM users ORDER BY elo_score DESC";
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            ResultSet resultSet = statement.executeQuery();
+            while(resultSet.next()) {
+                scores.put(resultSet.getString("username"), resultSet.getInt("elo_score"));
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return scores;
+    }
+
 }

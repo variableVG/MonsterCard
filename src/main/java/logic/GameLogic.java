@@ -12,6 +12,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.stream.Collector;
 
 
@@ -187,4 +188,56 @@ public class GameLogic {
         return true;
 
     }
+
+    public JSONObject getUserData(String username, String token) throws Exception{
+        //Check Authorization:
+        User user = dbHandler.getUserByToken(token);
+
+        if(user.getUsername().equals(username)) {
+            JSONObject jsonUser = new JSONObject();
+            jsonUser.put("username", user.getUsername());
+            jsonUser.put("coins", user.getCoins());
+            jsonUser.put("cards", user.getStack());
+            jsonUser.put("deck", user.getDeck());
+            return jsonUser;
+        }
+        return null;
+    }
+
+    public boolean updateUser(String username, String token, JSONObject updateContent) throws Exception {
+        //Check Authorization:
+        User user = dbHandler.getUserByToken(token);
+
+        if(!user.getUsername().equals(username)) {
+            throw new Exception("Token and user do not match");
+        }
+        for(String key : updateContent.keySet()) {
+            Object value = updateContent.get(key);
+            if(!dbHandler.updateUser(key.toLowerCase(), value, user.getUsername())) {
+                return false;
+            }
+
+        }
+        return true;
+    }
+
+    public int getEloScore(String token) throws Exception {
+        User user = dbHandler.getUserByToken(token);
+        int elo = -1;
+        if (user == null) {
+            throw new Exception("Token does not exists");
+        }
+        else {
+            elo = dbHandler.getUserEloScore(user.getUsername());
+        }
+        return elo;
+    }
+
+    public HashMap getScoreboard() throws Exception {
+        HashMap<String, Integer> scores = dbHandler.getScores();
+        return scores;
+    }
+
+
+
 }

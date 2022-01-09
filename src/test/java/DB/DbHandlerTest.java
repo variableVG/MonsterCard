@@ -1,6 +1,5 @@
 package DB;
 
-import logic.GameLogicTest;
 import logic.User;
 import logic.cards.Card;
 import logic.cards.MonsterCard;
@@ -8,8 +7,7 @@ import logic.cards.SpellCard;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -109,7 +107,28 @@ public class DbHandlerTest {
 
         dbHandler.showUserDeck("altenhof");
 
+    }
 
+    @Test
+    void getUserEloScore()throws Exception {
+        User user1 = dbHandler.getUserByToken("Basic kienboec-mtcgToken");
+        User user2 = dbHandler.getUserByToken("Basic altenhof-mtcgToken");
 
+        int elo1 = dbHandler.getUserEloScore(user1.getUsername());
+        int elo2 = dbHandler.getUserEloScore(user2.getUsername());
+
+        System.out.println("Elo scores are " + elo1 + " and " + elo2);
+
+    }
+
+    @Test
+    void getScoreboard() {
+        HashMap<String, Integer> scores = dbHandler.getScores();
+
+        Iterator iterator = scores.entrySet().iterator();
+        while(iterator.hasNext()) {
+            Map.Entry pair = (Map.Entry)iterator.next();
+            System.out.println(pair.getKey() + ", " + pair.getValue());
+        }
     }
 }
