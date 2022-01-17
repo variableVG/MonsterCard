@@ -24,7 +24,11 @@ public class DbHandler {
 
         // create the table
         // PostgreSQL documentation: https://www.postgresqltutorial.com/postgresql-create-table/
-        String dbSentence = "CREATE TABLE IF NOT EXISTS users (\n" +
+        String dbSentence = "DROP TABLE users CASCADE;  DROP TABLE cards CASCADE; DROP TABLE packages CASCADE;" +
+                "            DROP TABLE packages_cards CASCADE; DROP TABLE users_cards CASCADE; DROP TABLE deck_cards CASCADE;" +
+                "            DROP TABLE battles CASCADE; DROP TABLE store CASCADE;" +
+                "" +
+                "CREATE TABLE IF NOT EXISTS users (\n" +
                 "                    username VARCHAR(50) NOT NULL PRIMARY KEY,\n" +
                 "                    password VARCHAR(50) NOT NULL, \n" +
                 "                    coins NUMERIC DEFAULT 20, \n" +
@@ -186,6 +190,7 @@ public class DbHandler {
         }
         return true;
     }
+
 
     public User getUserByToken(String token) {
         User user = null;

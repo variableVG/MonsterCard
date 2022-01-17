@@ -31,8 +31,8 @@ public class GameLogic {
 
     //USER
     public User createUser(String username, String password) {
+        /** returns null if user already exists, otherwise creates a User and returns it*/
         return dbHandler.createUniqueUser(username, password);
-
     }
 
     public User loginUser(String username, String password) {
@@ -104,23 +104,24 @@ public class GameLogic {
             }
         }
         else {
-            System.out.println("A package must contain 5 cards");
-            return false;
+            throw new Exception("A package must contain 5 cards");
+
         }
 
         //Just Admin can add packages to the DB. We check that the token belongs to the admin.
         User user = dbHandler.getUserByToken(token);
         if(!user.getUsername().equals("admin")) {
-            System.out.println("User must be admin to create add Packages to the DB");
-            return false;
+            throw new Exception("User must be admin to create add Packages to the DB");
         }
 
         //Add cards to the DB:
-        dbHandler.addPackageToDB(cards, user.getUsername());
+        if(!dbHandler.addPackageToDB(cards, user.getUsername())) {
+            return false;
+        }
         return true;
     }
 
-    public Object acquirePackage(String token) throws Exception {
+    public JSONArray acquirePackage(String token) throws Exception {
         //Get user:
         User user = dbHandler.getUserByToken(token);
         //Check if user exists:

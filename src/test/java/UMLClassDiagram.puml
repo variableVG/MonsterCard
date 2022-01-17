@@ -130,8 +130,6 @@ enum MonserType {
   ELF
 }
 
-
-
 User "1" -- "*" Card
 User "1" -- "1" Deck
 Deck "1" -- "4" Card
