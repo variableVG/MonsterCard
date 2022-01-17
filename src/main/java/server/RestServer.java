@@ -288,6 +288,22 @@ public class RestServer implements Runnable {
                     }
 
                 }
+                else if(jsonHeader.getString("Request-URI").equals("/sell")) {
+                    String token = jsonHeader.getString("Authorization");
+                    String cardId = jsonContent.getString("na");
+                    String answer = gameLogic.sellCard(token, cardId);
+                    if(!answer.isEmpty()) {
+                        jsonAnswer = new JSONObject();
+                        jsonAnswer.put("result", "OK");
+                        jsonAnswer.put("message", answer);
+                        requestAnswer = new RequestAnswer(200, jsonAnswer);
+
+                    }
+                    else {
+                        throw new Exception("A problem has happened during trade");
+                    }
+
+                }
 
             }
             else if(jsonHeader.getString("Method").equals("GET")) {
@@ -390,6 +406,14 @@ public class RestServer implements Runnable {
                         requestAnswer = new RequestAnswer(200, jsonAnswer);
                     }
 
+                }
+                else if(jsonHeader.getString("Request-URI").equals("/coins")) {
+                    String token = jsonHeader.getString("Authorization");
+                    int answer = gameLogic.getCoins(token);
+                    jsonAnswer = new JSONObject();
+                    jsonAnswer.put("result", "OK");
+                    jsonAnswer.put("coins", answer);
+                    requestAnswer = new RequestAnswer(200, jsonAnswer);
                 }
             }
             else if(jsonHeader.getString("Method").equals("PUT")) {

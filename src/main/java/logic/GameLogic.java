@@ -367,4 +367,34 @@ public class GameLogic {
 
     }
 
+    public String sellCard(String token, String cardId) throws Exception {
+        String answer = "";
+        User user = dbHandler.getUserByToken(token);
+        if (user == null) {
+            throw new Exception("User not authorized");
+        }
+
+        if(!dbHandler.doesCardBelongsToUser(user.getUsername(), cardId)) {
+            throw new Exception("User " + user.getUsername() + " cannot trade this card, It does not belong to him.");
+        }
+
+        dbHandler.deleteCardFromStore(cardId);
+        int actualCoins = user.getCoins() + 5;
+        dbHandler.setCoins(user.getUsername(), actualCoins);
+
+        answer = "Card " + cardId + " has been sold, you now have " + actualCoins + " coins.";
+
+        return answer;
+    }
+
+    public int getCoins(String token) throws Exception {
+        User user = dbHandler.getUserByToken(token);
+        if (user == null) {
+            throw new Exception("User not authorized");
+        }
+
+        return dbHandler.getUserCoins(user.getUsername());
+
+    }
+
 }

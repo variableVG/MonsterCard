@@ -735,4 +735,24 @@ public class DbHandler {
         return user;
     }
 
+    public int getUserCoins(String username) {
+        int coins = -1;
+        String sqlStatement = "SELECT coins FROM users WHERE username = ?";
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            statement.setString(1, username);
+            ResultSet resultSet = statement.executeQuery();
+            if(resultSet.next()) {
+                coins = resultSet.getInt("coins");
+            }
+            else{
+                throw new Exception("User score not found");
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return coins;
+    }
 }
