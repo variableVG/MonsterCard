@@ -16,37 +16,16 @@ public class Card {
 
     protected ElemType type;
 
-    /*
-    Card () {
-        Random rand = new Random();
-        int randElemTypeNum = rand.nextInt(3);
-
-        if(randElemTypeNum == 0) {
-            type = ElemType.Fire;
-        }
-        else if(randElemTypeNum == 1) {
-            type = ElemType.Water;
-
-        }
-        else if(randElemTypeNum == 2) {
-            type = ElemType.Normal;
-        }
-        else {
-            System.out.println("An error has happened in the cards constructor while assigning the type");
-        }
-
-
-    }
-    */
-
     public Card(String id, String name, double damage) {
+        /** To create a card we use the constructor. Parsing the name of the card, we can get which type of card it is.
+         * */
         //set Id
         this.id = id;
 
         //set name
         this.name = name;
 
-        //check the element of the card:
+        //check the element of the card by parsing its name.
         if(name.contains(ElemType.Fire.toString())) {
             this.type = ElemType.Fire;
         }
