@@ -30,6 +30,7 @@ public class GameLogic {
     public GameLogic() {
         dummyDB = new DummyUserDB();
         dbHandler = new DbHandler();
+        DbHandler.initDb();
     }
 
 
@@ -260,6 +261,110 @@ public class GameLogic {
         return scores;
     }
 
+    public String publicCardInStore(String cardId, String cardToTrade, String type, int damage, String token) throws Exception {
+        User user = dbHandler.getUserByToken(token);
+        if (user == null) {
+            throw new Exception("User not authorized");
+        }
+        String answer = "";
+        if(dbHandler.publicCardInStore(cardId, cardToTrade, type, damage, user.getUsername())) {
+            Card cardToOffer = dbHandler.getCardById(cardId);
+            Card cardLookedFor = dbHandler.getCardById(cardToTrade);
+            answer = "Player " + user.getUsername() + " adds " + cardToOffer.getName() + " ( " +
+                    cardToOffer.getDamage() + " damage) in the store and wants " + type +
+                    " with min " + damage + " damage.";
+        }
 
+        return answer;
+    }
+
+    public JSONObject showStore(String token) throws Exception {
+        User user = dbHandler.getUserByToken(token);
+        if (user == null) {
+            throw new Exception("User not authorized");
+        }
+
+        HashMap<Integer, HashMap<String, Card>> store = dbHandler.showStore();
+        JSONObject answer = new JSONObject();
+        String username = "";
+        String cardToOfferName = "";
+        double cardToOfferDamage = 0 ;
+        String cardLookedForType = "";
+        double cardLookedForDamage = 0;
+
+
+        for(int tradeId : store.keySet()) {
+            for(String key : store.get(tradeId).keySet()) {
+                System.out.println("key is " + key);
+                if(store.get(tradeId).get(key) == null) {
+                    username = key;
+                }
+                else if(key.equals("Card to offer")) {
+                    cardToOfferName = store.get(tradeId).get(key).getName();
+                    cardToOfferDamage = store.get(tradeId).get(key).getDamage();
+
+                }
+                else if(key.equals("Card would like to have")) {
+                    cardLookedForType = store.get(tradeId).get(key).getName();
+                    cardLookedForDamage = store.get(tradeId).get(key).getDamage();
+                }
+                answer.put("Trading " + String.valueOf(tradeId), "Player " + username + " adds " + cardToOfferName + " ( " +
+                        cardToOfferDamage + " damage) in the store and wants " + cardLookedForType +
+                        " with min " + cardLookedForDamage + " damage.");
+
+            }
+
+
+        }
+
+        System.out.println(answer);
+        return answer;
+    }
+
+    public String tradeCard(String cardIwantId, String cardIofferId, String token) throws Exception {
+        String answer = "";
+        User user = dbHandler.getUserByToken(token);
+        if (user == null) {
+            throw new Exception("User not authorized");
+        }
+
+        if(!dbHandler.doesCardBelongsToUser(user.getUsername(), cardIofferId)) {
+            throw new Exception("User " + user.getUsername() + " cannot trade this card, It does not belong to him.");
+        }
+
+        User user2 = dbHandler.getUserByCard(cardIwantId);
+        if(user.getUsername().equals(user2.getUsername())) {
+            throw new Exception("You cannot trade cards with yourself!");
+        }
+
+        dbHandler.deleteCardFromUser(user.getUsername(), cardIofferId);
+        dbHandler.addCardToUser(user.getUsername(), cardIwantId);
+
+        dbHandler.deleteCardFromUser(user2.getUsername(), cardIwantId);
+        dbHandler.addCardToUser(user2.getUsername(), cardIofferId);
+
+        Card cardIoffer = dbHandler.getCardById(cardIofferId);
+        Card cardIwant = dbHandler.getCardById(cardIwantId);
+
+        answer = "Player " + user.getUsername() + " accepts trade with " + user2.getUsername() +" and trades card" +
+            cardIoffer.getName() + " (damage " + cardIoffer.getDamage() + ") for card " + cardIwant.getName() +
+            " (damage " + cardIwant.getDamage() + ").";
+
+        return answer;
+    }
+
+    public void deleteCardFromStore(String token, String cardId) throws Exception {
+        User user = dbHandler.getUserByToken(token);
+        if (user == null) {
+            throw new Exception("User not authorized");
+        }
+
+        if(!dbHandler.doesCardBelongsToUser(user.getUsername(), cardId)) {
+            throw new Exception("Card does not belong to user");
+        }
+
+        dbHandler.deleteCardFromStore(cardId);
+
+    }
 
 }

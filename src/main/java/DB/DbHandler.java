@@ -62,7 +62,15 @@ public class DbHandler {
                 "                   battle_id SERIAL PRIMARY KEY," +
                 "                   player1 VARCHAR(50) NOT NULL REFERENCES users(username) ON UPDATE CASCADE ON DELETE CASCADE, " +
                 "                   player2 VARCHAR(50) REFERENCES users(username) ON UPDATE CASCADE ON DELETE CASCADE," +
-                "                   winner VARCHAR(50)); \n" +
+                "                   winner VARCHAR(50)); " +
+                "           CREATE TABLE IF NOT EXISTS store (  " +
+                "                   trade_id SERIAL PRIMARY KEY, " +
+                "                   card_id VARCHAR(50) REFERENCES cards(card_id) ON UPDATE CASCADE ON DELETE CASCADE, " +
+                "                   card_to_trade VARCHAR(50) REFERENCES cards(card_id) ON UPDATE CASCADE ON DELETE CASCADE, " +
+                "                   type VARCHAR(50), " +
+                "                   minimum_damage NUMERIC, " +
+                "                   username VARCHAR(50) REFERENCES users(username) ON UPDATE CASCADE ON DELETE CASCADE," +
+                "                   UNIQUE (trade_id, card_id));\n" +
                 "           ";
         try {
             DbConnection.getInstance().executeSql(dbSentence);
@@ -603,6 +611,128 @@ public class DbHandler {
         }
 
         return pair;
+    }
+
+    public boolean publicCardInStore(String cardId, String cardToTrade, String type, int damage, String user) throws Exception {
+        String sqlStatement = "INSERT INTO store(card_id, card_to_trade, type, minimum_damage, username) VALUES(?, ?, ?, ?, ?);";
+
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            statement.setString(1, cardId);
+            statement.setString(2, cardToTrade);
+            statement.setString(3, type);
+            statement.setInt(4, damage);
+            statement.setString(5, user);
+            statement.execute();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            throw new Exception(throwables.getMessage());
+        }
+
+        return true;
+    }
+
+    public HashMap<Integer, HashMap<String, Card>> showStore() {
+        HashMap<Integer, HashMap<String, Card>> answer = new HashMap<>();
+
+        String sqlStatement = "SELECT * FROM store JOIN cards USING(card_id);";
+
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            ResultSet resultSet = statement.executeQuery();
+            while( resultSet.next() ) {
+                Card offerCard = new Card(resultSet.getString("card_id"), resultSet.getString("name"), resultSet.getDouble("damage"));
+                Card lookForCard = new Card(resultSet.getString("card_to_trade"), resultSet.getString("type"), resultSet.getDouble("minimum_damage"));
+                HashMap<String, Card> tradeInfo = new HashMap<>();
+                tradeInfo.put("Card to offer", offerCard);
+                tradeInfo.put("Card would like to have", lookForCard);
+                tradeInfo.put(resultSet.getString("username"), null);
+                answer.put(resultSet.getInt("trade_id"), tradeInfo);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+        return answer;
+    }
+
+    public Card getCardById(String cardId) {
+        Card card = null;
+        String sqlStatement = "SELECT * FROM cards WHERE card_id = ?";
+
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            statement.setString(1, cardId);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (!resultSet.next()) { // if username does not exist
+                throw new Exception("Card does not exist in the DB");
+            }
+            else {
+                card = new Card(resultSet.getString("card_id"), resultSet.getString("name"), resultSet.getDouble("damage"));
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        return card;
+
+    }
+
+    public void deleteCardFromStore(String cardId) throws Exception {
+        String sqlStatement = "DELETE FROM store WHERE card_id = ?";
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            statement.setString(1, cardId);
+            statement.execute();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            throw new Exception(throwables.getMessage());
+        }
+    }
+
+    public User getUserByCard(String cardId) {
+        User user = null;
+        String sqlStatement = "SELECT * FROM users JOIN users_cards USING(username) WHERE card_id = ?";
+
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            statement.setString(1, cardId);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (!resultSet.next()) { // if username does not exist
+                throw new Exception("Token does not exist in the DB");
+            }
+            else {
+                String username = resultSet.getString("username");
+                String password = resultSet.getString("password");
+                Integer coins = resultSet.getInt("coins");
+                Integer elo = resultSet.getInt("elo_score");
+                //getCards:
+                ArrayList<Card> cardsInStack = getUserCards(username);
+                ArrayList<Card> cardsInDeck = (ArrayList<Card>) showUserDeck(username);
+
+                user = User.builder()
+                        .username(username)
+                        .password(password) // maybe password should not be included
+                        .coins(coins)
+                        .eloScore(elo)
+                        .stack(cardsInStack)
+                        .deck(cardsInDeck)
+                        .build();
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return user;
     }
 
 }

@@ -105,6 +105,11 @@ public class GameLogicTest {
         gameLogic.startBattle("user1");
     }
 
+    @Test
+    void showStore() throws Exception {
+        gameLogic.showStore("Basic kienboec-mtcgToken");
+    }
+
    /* @Test
     @DisplayName("Add Packages to DB")
     void addPackageToDBTest() {

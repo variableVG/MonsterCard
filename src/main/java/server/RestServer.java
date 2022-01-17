@@ -93,13 +93,16 @@ public class RestServer implements Runnable {
                                 jsonContent = null;
                             }
                             else if(contentMsg.charAt(0) =='['){ //If the content is an array:
-                                System.out.println("es un array");
                                 JSONArray jsonArray = new JSONArray(contentMsg);
                                 jsonContent = new JSONObject();
                                 jsonContent.put("cards", jsonArray);
 
                             }
                             else {
+                                if(contentMsg.charAt(0) != '{') {
+                                    contentMsg = "{ na:" + contentMsg + "}";
+
+                                }
                                 jsonContent = new JSONObject(contentMsg);
                             }
 
@@ -244,6 +247,48 @@ public class RestServer implements Runnable {
 
                     }
                 }
+                else if (jsonHeader.getString("Request-URI").contains("/tradings")) {
+                    String token = jsonHeader.getString("Authorization");
+                    //get cardId
+                    String url = jsonHeader.getString("Request-URI");
+                    String cardId = url.substring(url.lastIndexOf('/') + 1);
+                    //Check
+                    if(cardId.equals("tradings")) { // post a card for trading
+                        cardId = jsonContent.getString("Id");
+                        String cardToTrade = jsonContent.getString("CardToTrade");
+                        String type = jsonContent.getString("Type");
+                        int minimumDamage = jsonContent.getInt("MinimumDamage");
+                        String answer = gameLogic.publicCardInStore(cardId, cardToTrade, type, minimumDamage, token);
+                        if(!answer.isEmpty()) {
+                            jsonAnswer = new JSONObject();
+                            jsonAnswer.put("result", "OK");
+                            jsonAnswer.put("message", answer);
+                            requestAnswer = new RequestAnswer(200, jsonAnswer);
+
+                        }
+                        else {
+                            throw new Exception("Card could not be added to the store");
+                        }
+
+                    }
+                    else { // trade a card
+                        String cardIwant = cardId;
+                        String cardIoffer = jsonContent.getString("na");
+                        String answer = gameLogic.tradeCard(cardIwant, cardIoffer, token);
+                        if(!answer.isEmpty()) {
+                            jsonAnswer = new JSONObject();
+                            jsonAnswer.put("result", "OK");
+                            jsonAnswer.put("message", answer);
+                            requestAnswer = new RequestAnswer(200, jsonAnswer);
+
+                        }
+                        else {
+                            throw new Exception("A problem has happened during trade");
+                        }
+                    }
+
+                }
+
             }
             else if(jsonHeader.getString("Method").equals("GET")) {
                 if(jsonHeader.getString("Request-URI").equals("/cards")){
@@ -329,6 +374,23 @@ public class RestServer implements Runnable {
                     }
 
                 }
+                else if(jsonHeader.getString("Request-URI").equals("/tradings")) {
+                    String token = jsonHeader.getString("Authorization");
+                    JSONObject answer = gameLogic.showStore(token);
+                    if(answer != null ) {
+                        jsonAnswer = new JSONObject();
+                        jsonAnswer.put("result", "OK");
+                        if(answer.isEmpty()) {
+                            jsonAnswer.put("message", "store is empty.");
+                        }
+                        else {
+                            jsonAnswer.put("message", answer);
+                        }
+
+                        requestAnswer = new RequestAnswer(200, jsonAnswer);
+                    }
+
+                }
             }
             else if(jsonHeader.getString("Method").equals("PUT")) {
                 if(jsonHeader.getString("Request-URI").equals("/deck")) {
@@ -361,6 +423,15 @@ public class RestServer implements Runnable {
                 }
             }
             else if(jsonHeader.getString("Method").equals("DELETE")) {
+                String token = jsonHeader.getString("Authorization");
+                //get cardId
+                String url = jsonHeader.getString("Request-URI");
+                String cardId = url.substring(url.lastIndexOf('/') + 1);
+                gameLogic.deleteCardFromStore(token, cardId);
+                jsonAnswer = new JSONObject();
+                jsonAnswer.put("result", "OK");
+                jsonAnswer.put("message", "card " + cardId + " from store deleted.");
+                requestAnswer = new RequestAnswer(200, jsonAnswer);
 
             }
             else {
