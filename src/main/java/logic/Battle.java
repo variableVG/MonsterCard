@@ -16,7 +16,7 @@ public class Battle {
     private User player1;
     private User player2;
     private int battleId;
-    public DbHandler dbHandler;
+    private DbHandler dbHandler;
     public static final int STANDARD_DAMAGE = 5;
 
     public Battle(User player1, User player2, int battleId, DbHandler dbHandler) {
@@ -35,22 +35,6 @@ public class Battle {
         this.dbHandler = dbHandler;
 
     }
-
-    Card getCardFromDeck(User user, int randomIndex) {
-        //Cards are chosen randomly from the deck to compete: This part is done out of the function.
-        //Random rand = new Random();
-        //int randomIndex = rand.nextInt(4);
-
-        if(randomIndex > 4 || randomIndex < 0) { //control that randomIndex is correct.
-            System.out.println("getCardFromDeck(): RandomIndex out of range");
-            return null;
-        }
-        Card card = user.getDeck().get(randomIndex);
-        System.out.println("Success");
-        System.out.println("Random chosen card for user " + user.getUsername() + " is " + card.getName() + " with cardId " + card.getId());
-        return card;
-    }
-
 
     public Pair battleLogic(Card card1, Card card2) {
         /***This function just parses the logic of one particular round (also 2 particular cards).

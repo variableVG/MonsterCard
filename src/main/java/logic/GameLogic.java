@@ -1,20 +1,15 @@
 package logic;
 
 import DB.DbHandler;
-import dummyDB.DummyUserDB;
 import kotlin.Pair;
 import logic.cards.Card;
 import lombok.Data;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.JSONString;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.stream.Collector;
 
 
 @Data
@@ -23,18 +18,18 @@ public class GameLogic {
     private static final int SIZE_OF_DECK = 4;
     private static final int PRICE_PACKAGE = 5;
 
-    public DummyUserDB dummyDB;
-    public DbHandler dbHandler;
+    //public DummyUserDB dummyDB;
+    private DbHandler dbHandler;
 
 
     public GameLogic() {
-        dummyDB = new DummyUserDB();
+        //dummyDB = new DummyUserDB();
         dbHandler = new DbHandler();
         DbHandler.initDb();
     }
 
 
-    //user
+    //USER
     public User createUser(String username, String password) {
         return dbHandler.createUniqueUser(username, password);
 
@@ -48,6 +43,52 @@ public class GameLogic {
         return user;
     }
 
+    public JSONObject getUserData(String username, String token) throws Exception{
+        //Check Authorization:
+        User user = dbHandler.getUserByToken(token);
+
+        if(user.getUsername().equals(username)) {
+            JSONObject jsonUser = new JSONObject();
+            jsonUser.put("username", user.getUsername());
+            jsonUser.put("coins", user.getCoins());
+            jsonUser.put("cards", user.getStack());
+            jsonUser.put("deck", user.getDeck());
+            return jsonUser;
+        }
+        return null;
+    }
+
+    public boolean updateUser(String username, String token, JSONObject updateContent) throws Exception {
+        //Check Authorization:
+        User user = dbHandler.getUserByToken(token);
+
+        if(!user.getUsername().equals(username)) {
+            throw new Exception("Token and user do not match");
+        }
+        for(String key : updateContent.keySet()) {
+            Object value = updateContent.get(key);
+            if(!dbHandler.updateUser(key.toLowerCase(), value, user.getUsername())) {
+                return false;
+            }
+
+        }
+        return true;
+    }
+
+    public int getEloScore(String token) throws Exception {
+        User user = dbHandler.getUserByToken(token);
+        int elo = -1;
+        if (user == null) {
+            throw new Exception("Token does not exists");
+        }
+        else {
+            elo = dbHandler.getUserEloScore(user.getUsername());
+        }
+        return elo;
+    }
+
+
+    //CARDS
     public boolean addPackageToDB(JSONArray cardsInJson, String token) throws Exception {
         //dummyDB.cardPackages.add(cards);
 
@@ -153,6 +194,8 @@ public class GameLogic {
         return cardsInJson;
     }
 
+
+    //BATTLE
     public JSONObject startBattle(String token) {
         /** This function calls the startBattle in the DbHandler class. It gives back a pair with the battleId and
          * the opponent's username if there is already an open battle. Otherwise instead of the opponent's username returns
@@ -212,62 +255,20 @@ public class GameLogic {
 
     }
 
-    public JSONObject getUserData(String username, String token) throws Exception{
-        //Check Authorization:
-        User user = dbHandler.getUserByToken(token);
-
-        if(user.getUsername().equals(username)) {
-            JSONObject jsonUser = new JSONObject();
-            jsonUser.put("username", user.getUsername());
-            jsonUser.put("coins", user.getCoins());
-            jsonUser.put("cards", user.getStack());
-            jsonUser.put("deck", user.getDeck());
-            return jsonUser;
-        }
-        return null;
-    }
-
-    public boolean updateUser(String username, String token, JSONObject updateContent) throws Exception {
-        //Check Authorization:
-        User user = dbHandler.getUserByToken(token);
-
-        if(!user.getUsername().equals(username)) {
-            throw new Exception("Token and user do not match");
-        }
-        for(String key : updateContent.keySet()) {
-            Object value = updateContent.get(key);
-            if(!dbHandler.updateUser(key.toLowerCase(), value, user.getUsername())) {
-                return false;
-            }
-
-        }
-        return true;
-    }
-
-    public int getEloScore(String token) throws Exception {
-        User user = dbHandler.getUserByToken(token);
-        int elo = -1;
-        if (user == null) {
-            throw new Exception("Token does not exists");
-        }
-        else {
-            elo = dbHandler.getUserEloScore(user.getUsername());
-        }
-        return elo;
-    }
-
+    //SCOREBOARD
     public HashMap getScoreboard() throws Exception {
         HashMap<String, Integer> scores = dbHandler.getScores();
         return scores;
     }
 
-    public String publicCardInStore(String cardId, String cardToTrade, String type, int damage, String token) throws Exception {
+    //TRADDING
+    public String addCardToStore(String cardId, String cardToTrade, String type, int damage, String token) throws Exception {
         User user = dbHandler.getUserByToken(token);
         if (user == null) {
             throw new Exception("User not authorized");
         }
         String answer = "";
-        if(dbHandler.publicCardInStore(cardId, cardToTrade, type, damage, user.getUsername())) {
+        if(dbHandler.addCardToStore(cardId, cardToTrade, type, damage, user.getUsername())) {
             Card cardToOffer = dbHandler.getCardById(cardId);
             Card cardLookedFor = dbHandler.getCardById(cardToTrade);
             answer = "Player " + user.getUsername() + " adds " + cardToOffer.getName() + " ( " +
@@ -353,8 +354,10 @@ public class GameLogic {
         return answer;
     }
 
-    public void deleteCardFromStore(String token, String cardId) throws Exception {
+    public String deleteCardFromStore(String token, String cardId) throws Exception {
         User user = dbHandler.getUserByToken(token);
+        String answer = "";
+
         if (user == null) {
             throw new Exception("User not authorized");
         }
@@ -364,9 +367,12 @@ public class GameLogic {
         }
 
         dbHandler.deleteCardFromStore(cardId);
+        answer = "card " + cardId + " from store deleted.";
+        return answer;
 
     }
 
+    //UNIQUE FEATURES
     public String sellCard(String token, String cardId) throws Exception {
         String answer = "";
         User user = dbHandler.getUserByToken(token);

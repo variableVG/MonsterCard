@@ -1,0 +1,15 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+Client -> RESTServer: Request (JSON)
+RESTServer -> GameLogic: Request (JSON)
+GameLogic -> DbHandler: Request (JSON)
+DbHandler-> PostgreSQL: Request (JSON)
+PostgreSQL --> DbHandler: Response (JSON)
+DbHandler --> GameLogic: Response (JSON)
+GameLogic --> RESTServer: Response (JSON)
+RESTServer --> Client: Response(JSON)
+
+@enduml

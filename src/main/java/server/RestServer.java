@@ -3,17 +3,13 @@ package server;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.regex.Pattern;
 
 import logic.GameLogic;
 import logic.User;
 import org.json.HTTP;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
-import javax.naming.ldap.HasControls;
 
 public class RestServer implements Runnable {
     private static int port = 10001;
@@ -258,7 +254,7 @@ public class RestServer implements Runnable {
                         String cardToTrade = jsonContent.getString("CardToTrade");
                         String type = jsonContent.getString("Type");
                         int minimumDamage = jsonContent.getInt("MinimumDamage");
-                        String answer = gameLogic.publicCardInStore(cardId, cardToTrade, type, minimumDamage, token);
+                        String answer = gameLogic.addCardToStore(cardId, cardToTrade, type, minimumDamage, token);
                         if(!answer.isEmpty()) {
                             jsonAnswer = new JSONObject();
                             jsonAnswer.put("result", "OK");
@@ -451,11 +447,13 @@ public class RestServer implements Runnable {
                 //get cardId
                 String url = jsonHeader.getString("Request-URI");
                 String cardId = url.substring(url.lastIndexOf('/') + 1);
-                gameLogic.deleteCardFromStore(token, cardId);
-                jsonAnswer = new JSONObject();
-                jsonAnswer.put("result", "OK");
-                jsonAnswer.put("message", "card " + cardId + " from store deleted.");
-                requestAnswer = new RequestAnswer(200, jsonAnswer);
+                String answer = gameLogic.deleteCardFromStore(token, cardId);
+                if(!answer.isEmpty()) {
+                    jsonAnswer = new JSONObject();
+                    jsonAnswer.put("result", "OK");
+                    jsonAnswer.put("message", answer);
+                    requestAnswer = new RequestAnswer(200, jsonAnswer);
+                }
 
             }
             else {

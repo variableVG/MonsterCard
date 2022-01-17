@@ -81,6 +81,7 @@ public class DbHandler {
         }
     }
 
+    //USERS
     public Collection<User> getUsers() {
         ArrayList<User> result = new ArrayList<>();
         String sqlStatement = "SELECT * FROM users";
@@ -172,12 +173,11 @@ public class DbHandler {
         return user;
     }
 
-    public boolean setToken(String username) {
-        String token = "Basic " + username + "-mtcgToken";
-        String sqlStatement = "UPDATE users SET token = ? WHERE username = ?";
+    public boolean updateUser(String key, Object value, String username) {
+        String sqlStatement = "UPDATE users SET " + key + "= ? WHERE username = ?";
         try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
         ) {
-            statement.setString(1, token);
+            statement.setString(1, value.toString());
             statement.setString(2, username);
             statement.execute();
         } catch (SQLException throwables) {
@@ -268,6 +268,156 @@ public class DbHandler {
 
         return user;
     }
+
+    public User getUserByCard(String cardId) {
+        User user = null;
+        String sqlStatement = "SELECT * FROM users JOIN users_cards USING(username) WHERE card_id = ?";
+
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            statement.setString(1, cardId);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (!resultSet.next()) { // if username does not exist
+                throw new Exception("Token does not exist in the DB");
+            }
+            else {
+                String username = resultSet.getString("username");
+                String password = resultSet.getString("password");
+                Integer coins = resultSet.getInt("coins");
+                Integer elo = resultSet.getInt("elo_score");
+                //getCards:
+                ArrayList<Card> cardsInStack = getUserCards(username);
+                ArrayList<Card> cardsInDeck = (ArrayList<Card>) showUserDeck(username);
+
+                user = User.builder()
+                        .username(username)
+                        .password(password) // maybe password should not be included
+                        .coins(coins)
+                        .eloScore(elo)
+                        .stack(cardsInStack)
+                        .deck(cardsInDeck)
+                        .build();
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return user;
+    }
+
+    public ArrayList<Card> getUserCards(String username) {
+        ArrayList<Card> cards = new ArrayList<>();
+
+        String sqlStatement = "SELECT * FROM cards JOIN users_cards USING(card_id)\n" +
+                "WHERE username = ?; ";
+
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            statement.setString(1, username);
+            ResultSet resultSet = statement.executeQuery();
+
+            while( resultSet.next() ) {
+                Card card = new Card(resultSet.getString("card_id"), resultSet.getString("name"), resultSet.getDouble("damage"));
+                cards.add(card);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+        return cards;
+    }
+
+    public int getUserEloScore(String username) {
+        int eloScore = -1;
+        String sqlStatement = "SELECT elo_score FROM users WHERE username = ?";
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            statement.setString(1, username);
+            ResultSet resultSet = statement.executeQuery();
+            if(resultSet.next()) {
+                eloScore = resultSet.getInt("elo_score");
+            }
+            else{
+                throw new Exception("User score not found");
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return eloScore;
+    }
+
+    public int getUserCoins(String username) {
+        int coins = -1;
+        String sqlStatement = "SELECT coins FROM users WHERE username = ?";
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            statement.setString(1, username);
+            ResultSet resultSet = statement.executeQuery();
+            if(resultSet.next()) {
+                coins = resultSet.getInt("coins");
+            }
+            else{
+                throw new Exception("User score not found");
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return coins;
+    }
+
+    public boolean setToken(String username) {
+        String token = "Basic " + username + "-mtcgToken";
+        String sqlStatement = "UPDATE users SET token = ? WHERE username = ?";
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            statement.setString(1, token);
+            statement.setString(2, username);
+            statement.execute();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    public boolean setCoins(String username, int coins) {
+        String sqlStatement = "UPDATE users SET coins = ? WHERE username = ?";
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            statement.setInt(1, coins);
+            statement.setString(2, username);
+            statement.execute();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    public boolean setElo(String username, int eloScore) {
+        String sqlStatement = "UPDATE users SET elo_score = ? WHERE username = ?";
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            statement.setInt(1, eloScore);
+            statement.setString(2, username);
+            statement.execute();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+
+    //CARDS
 
     public boolean addPackageToDB(ArrayList<Card> cards, String author) throws Exception {
 
@@ -390,55 +540,61 @@ public class DbHandler {
 
     }
 
-    public boolean setCoins(String username, int coins) {
-        String sqlStatement = "UPDATE users SET coins = ? WHERE username = ?";
+    public boolean doesCardBelongsToUser(String username, String cardId) throws Exception{
+        String user = "";
+        String sqlStatement = "SELECT username FROM users_cards WHERE card_id = ?";
         try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
         ) {
-            statement.setInt(1, coins);
-            statement.setString(2, username);
-            statement.execute();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-            return false;
-        }
-        return true;
-    }
-
-    public boolean setElo(String username, int eloScore) {
-        String sqlStatement = "UPDATE users SET elo_score = ? WHERE username = ?";
-        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
-        ) {
-            statement.setInt(1, eloScore);
-            statement.setString(2, username);
-            statement.execute();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-            return false;
-        }
-        return true;
-    }
-
-    public ArrayList<Card> getUserCards(String username) {
-        ArrayList<Card> cards = new ArrayList<>();
-
-        String sqlStatement = "SELECT * FROM cards JOIN users_cards USING(card_id)\n" +
-                "WHERE username = ?; ";
-
-        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
-        ) {
-            statement.setString(1, username);
+            statement.setString(1, cardId);
             ResultSet resultSet = statement.executeQuery();
 
-            while( resultSet.next() ) {
-                Card card = new Card(resultSet.getString("card_id"), resultSet.getString("name"), resultSet.getDouble("damage"));
-                cards.add(card);
+            if( resultSet.next() ) {
+                user = resultSet.getString("username");
+                if(!user.equals(username)) {
+                    throw new Exception(cardId + " does not belong to user " + username + " but to user " + user);
+
+                }
+            }
+            else {
+                throw new Exception("This card is not in the database");
             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
+
+    public Card getCardById(String cardId) {
+        Card card = null;
+        String sqlStatement = "SELECT * FROM cards WHERE card_id = ?";
+
+        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
+        ) {
+            statement.setString(1, cardId);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (!resultSet.next()) { // if username does not exist
+                throw new Exception("Card does not exist in the DB");
+            }
+            else {
+                card = new Card(resultSet.getString("card_id"), resultSet.getString("name"), resultSet.getDouble("damage"));
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        return cards;
+
+        return card;
+
     }
+
+
+    //BATTLE
 
     public Collection<Card> showUserDeck(String username) {
         ArrayList<Card> cards = new ArrayList<>();
@@ -460,31 +616,6 @@ public class DbHandler {
         }
 
         return cards;
-    }
-
-    public boolean doesCardBelongsToUser(String username, String cardId) {
-        String user = "";
-        String sqlStatement = "SELECT username FROM users_cards WHERE card_id = ?";
-        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
-        ) {
-            statement.setString(1, cardId);
-            ResultSet resultSet = statement.executeQuery();
-
-            if( resultSet.next() ) {
-                user = resultSet.getString("username");
-                if(!user.equals(username)) {
-                    System.out.println(cardId + " does not belong to user " + username + "but to user " + user);
-                    return false;
-                }
-            }
-            else {
-                System.out.println("This card is not in the database");
-                return false;
-            }
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-        return true;
     }
 
     public void deleteDeckFromUser(String username) {
@@ -511,41 +642,6 @@ public class DbHandler {
             throwables.printStackTrace();
         }
 
-    }
-
-    public boolean updateUser(String key, Object value, String username) {
-        String sqlStatement = "UPDATE users SET " + key + "= ? WHERE username = ?";
-        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
-        ) {
-            statement.setString(1, value.toString());
-            statement.setString(2, username);
-            statement.execute();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-            return false;
-        }
-        return true;
-    }
-
-    public int getUserEloScore(String username) {
-        int eloScore = -1;
-        String sqlStatement = "SELECT elo_score FROM users WHERE username = ?";
-        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
-        ) {
-            statement.setString(1, username);
-            ResultSet resultSet = statement.executeQuery();
-            if(resultSet.next()) {
-                eloScore = resultSet.getInt("elo_score");
-            }
-            else{
-                throw new Exception("User score not found");
-            }
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return eloScore;
     }
 
     public HashMap getScores(){
@@ -613,7 +709,9 @@ public class DbHandler {
         return pair;
     }
 
-    public boolean publicCardInStore(String cardId, String cardToTrade, String type, int damage, String user) throws Exception {
+    //TRADE
+
+    public boolean addCardToStore(String cardId, String cardToTrade, String type, int damage, String user) throws Exception {
         String sqlStatement = "INSERT INTO store(card_id, card_to_trade, type, minimum_damage, username) VALUES(?, ?, ?, ?, ?);";
 
         try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
@@ -656,33 +754,6 @@ public class DbHandler {
         return answer;
     }
 
-    public Card getCardById(String cardId) {
-        Card card = null;
-        String sqlStatement = "SELECT * FROM cards WHERE card_id = ?";
-
-        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
-        ) {
-            statement.setString(1, cardId);
-            ResultSet resultSet = statement.executeQuery();
-
-            if (!resultSet.next()) { // if username does not exist
-                throw new Exception("Card does not exist in the DB");
-            }
-            else {
-                card = new Card(resultSet.getString("card_id"), resultSet.getString("name"), resultSet.getDouble("damage"));
-            }
-
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-
-        return card;
-
-    }
-
     public void deleteCardFromStore(String cardId) throws Exception {
         String sqlStatement = "DELETE FROM store WHERE card_id = ?";
         try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
@@ -695,64 +766,6 @@ public class DbHandler {
         }
     }
 
-    public User getUserByCard(String cardId) {
-        User user = null;
-        String sqlStatement = "SELECT * FROM users JOIN users_cards USING(username) WHERE card_id = ?";
 
-        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
-        ) {
-            statement.setString(1, cardId);
-            ResultSet resultSet = statement.executeQuery();
 
-            if (!resultSet.next()) { // if username does not exist
-                throw new Exception("Token does not exist in the DB");
-            }
-            else {
-                String username = resultSet.getString("username");
-                String password = resultSet.getString("password");
-                Integer coins = resultSet.getInt("coins");
-                Integer elo = resultSet.getInt("elo_score");
-                //getCards:
-                ArrayList<Card> cardsInStack = getUserCards(username);
-                ArrayList<Card> cardsInDeck = (ArrayList<Card>) showUserDeck(username);
-
-                user = User.builder()
-                        .username(username)
-                        .password(password) // maybe password should not be included
-                        .coins(coins)
-                        .eloScore(elo)
-                        .stack(cardsInStack)
-                        .deck(cardsInDeck)
-                        .build();
-            }
-
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return user;
-    }
-
-    public int getUserCoins(String username) {
-        int coins = -1;
-        String sqlStatement = "SELECT coins FROM users WHERE username = ?";
-        try ( PreparedStatement statement = DbConnection.getInstance().prepareStatement(sqlStatement)
-        ) {
-            statement.setString(1, username);
-            ResultSet resultSet = statement.executeQuery();
-            if(resultSet.next()) {
-                coins = resultSet.getInt("coins");
-            }
-            else{
-                throw new Exception("User score not found");
-            }
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return coins;
-    }
 }

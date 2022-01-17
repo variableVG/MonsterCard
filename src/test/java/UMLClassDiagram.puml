@@ -1,18 +1,11 @@
 @startuml
 
 class User {
-  String username
-  String password
-  int coins
-
-  registerUser()
-  loginUser()
-  getCard()
-  defineDeck()
-  battle()
-  checkScoreBoard()
-  buyPackage()
-  tradingDeal()
+  -String username
+  -String password
+  -String token
+  -int coins
+  -int eloScore
 
 }
 
@@ -21,23 +14,105 @@ class Deck {
 }
 
 class Card {
-  String name
-  final String damage
-  enum elementType
+  -String id
+  -String name
+  -double damage
+  -String cardType
+  -ElementType
+  +Card()
+  +isPureMonster()
 }
 
 class SpellCard extends Card {
-
+    +SpellCard()
 }
 
 class MonsterCard extends Card {
-  MonsterTyp monstertyp
+  -MonsterTyp monstertype
+  +MonsterCard()
 }
 
 class Battle {
-
+  -User player1
+  -User player2
+  -int battleid
+  +Battle()
+  +battleLogic()
+  +battleFight()
 }
 
+class GameLogic {
+  -DbHandler
+  +GameLogic()
+  +createUser()
+  +getUserData()
+  +updateUser()
+  +getEloScore()
+  +addPackageToDB()
+  +acquirePackage()
+  +getUserCards()
+  +showUserDeck()
+  +startBattle()
+  +configureDeck()
+  +getScoreBoard()
+  +addCardToStore()
+  +showStore()
+  +tradeCard()
+  +deleteCardFromStore()
+  +sellCard()
+  +getCoins()
+}
+
+class DbHandler {
+   +initDB()
+   +getUsers()
+   +createUniqueUser()
+   +loginUser()
+   +updateUser()
+   +getUserByToken()
+   +getUserByUsername()
+   +getUserByCard()
+   +getUserCards()
+   +getUserEloScore()
+   +getUserCoins()
+   +setToken()
+   +setCoins()
+   +setElo()
+   +addPackageToDB()
+   +acquirePackage()
+   +addCardToUser()
+   +deleteCardFromUser()
+   +deletePackage()
+   +doesCardBelongsToUser()
+   +getCardById()
+   +showUserDeck()
+   +deleteDeckFromUser()
+   +addCardToStore()
+   +getScores()
+   +startBattle()
+   +addCardToDeck()
+   +showStore()
+   +deleteCardFromStore()
+}
+
+class DbConnection {
+   -DbConnection instance
+   -Connection connection
+   -DbConfig dbConfig
+   +connect()
+   +getConnection()
+   +prepareStatement()
+   +executeSql()
+   +close()
+   +getInstance()
+}
+
+class DbConfig {
+  - String dbHost
+  - String dbUser
+  - String dbPassword
+  - String dbName
+}
 
 enum ElementType {
   FIRE
@@ -62,8 +137,12 @@ User "1" -- "1" Deck
 Deck "1" -- "4" Card
 Battle <-- Deck : user1
 Battle <-- Deck : user2
-
-
+Battle "*" --> "1" DbHandler
+GameLogic "1" --> "*" Battle
+GameLogic "1" --> "*" User
+GameLogic "1" --> "1" DbHandler
+DbHandler "*" --> "1" DbConnection
+DbConnection "1" --> "1" DbConfig
 
 
 @enduml

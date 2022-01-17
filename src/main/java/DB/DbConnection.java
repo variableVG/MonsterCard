@@ -33,7 +33,6 @@ public class DbConnection implements Closeable {
         return connect(dbConfig.getDbName());
     }
 
-
     public Connection getConnection() {
         if( connection==null ) {
             try {
@@ -44,7 +43,6 @@ public class DbConnection implements Closeable {
         }
         return connection;
     }
-
 
     public PreparedStatement prepareStatement(String sql) throws SQLException {
         return getConnection().prepareStatement(sql);

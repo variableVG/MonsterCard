@@ -49,27 +49,6 @@ public class BattleTest {
     //EVTL TO DO: TEST FUNCTION gameLogic.createBattle();
 
     @Test
-    @DisplayName("Show deck")
-    void getCardFromDeckTest(){
-        //TEST FOR USER1:
-        //Cards are chosen randomly from the deck to compete: This part is done out of the function.
-        Random rand = new Random();
-        int randomIndex = rand.nextInt(4);
-
-        //verify that the return value is not null:
-        assertTrue( battle.getCardFromDeck(user1, randomIndex) != null, "A card could be taken from the deck when it shouldn't. Maybe given index out of range" );
-        //now I verify that the gotten card is actually in the deck:
-        assertTrue( user1.getDeck().contains(battle.getCardFromDeck(user1, randomIndex)), "The chosen card is not in the deck of the user" );
-
-        randomIndex = rand.nextInt(4);
-
-        //TEST FOR USER 2:
-        //verify that the return value is not null:
-        assertTrue( battle.getCardFromDeck(user2, randomIndex) != null, "A card could be taken from the deck when it shouldn't. Maybe given index out of range" );
-        //now I verify that the gotten card is actually in the deck:
-        assertTrue( user2.getDeck().contains(battle.getCardFromDeck(user2, randomIndex)), "The chosen card is not in the deck of the user" );
-    }
-    @Test
     @DisplayName("Test battleLogicTest")
     void  battleLogicTest() {
 
