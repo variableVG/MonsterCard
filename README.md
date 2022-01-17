@@ -1,7 +1,7 @@
 # Monster Trading Card Game
 
 * Author: Violeta Garcia Espin
-* URL to git repository: [https://github.com/variableVG/MonsterCard](https://github.com/variableVG/MonsterCard)
+* URL to git repository: [https://github.com/variableVG/MonsterCard](https://github.com/variableVG/MonsterCard.git)
 
 ## Getting started
 1. Start a PostgresDB instance. Configure the username and password in
