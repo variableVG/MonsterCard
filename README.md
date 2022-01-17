@@ -34,5 +34,10 @@ A unit-test was planned for each function in the `GameLogic` and/or
 that the appropriate amount of coins is deducted when purchasing a package.
 Currently, not all functions come with their proper unit-test, due to time constraints.
 
+## Mandatory Unique Feature
+Users can sell their cards for 5 coins per card. The endpoint `/sell` can
+be used for this purpose. The user can check the remaining coins using
+`/coins`. The last two entries in the CURL script `MonsterTradingCards.exercise.curl.bat` use these features.
+
 ## Time Spent
 Please refer to the attached spreadsheet detailing the time spent.
