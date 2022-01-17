@@ -1,6 +1,6 @@
 # Monster Trading Card Game
 
-* Author: Violeta Garcia Espin
+* Author: Violeta Garcia Espin, if20b091
 * URL to git repository: [https://github.com/variableVG/MonsterCard](https://github.com/variableVG/MonsterCard)
 
 ## Getting started
