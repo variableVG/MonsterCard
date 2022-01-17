@@ -3,6 +3,14 @@
 * Author: Violeta Garcia Espin
 * URL to git repository: [https://github.com/variableVG/MonsterCard](https://github.com/variableVG/MonsterCard)
 
+## Getting started
+1. Start a PostgresDB instance. Configure the username and password in
+   `src/main/java/DB/DbConfig.java`.
+2. Start the REST server by running `src/main/java/server/RestServer.java`.
+   This listens on port 10001.
+3. Now the requests can be sent using the CURL script
+   `MonsterTradingCards.exercise.curl.bat`.
+
 ## Technical Steps
 * Preliminary logic was built, following the course material
   (e.g. card classes, battle logic, etc). 
@@ -25,7 +33,6 @@ A unit-test was planned for each function in the `GameLogic` and/or
 `DbHandler` classes. These check proper behaviour of the implementations, e.g., 
 that the appropriate amount of coins is deducted when purchasing a package.
 Currently, not all functions come with their proper unit-test, due to time constraints.
-
 
 ## Time Spent
 Please refer to the attached spreadsheet detailing the time spent.
