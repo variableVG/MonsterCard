@@ -40,4 +40,5 @@ be used for this purpose. The user can check the remaining coins using
 `/coins`. The last two entries in the CURL script `MonsterTradingCards.exercise.curl.bat` use these features.
 
 ## Time Spent
+The total work hours were: 52h 25min
 Please refer to the attached spreadsheet detailing the time spent.
